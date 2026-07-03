@@ -2,7 +2,14 @@
 
 ## Plateforme intelligente de gestion alimentaire
 
-**Version :** 0.1 (Document de travail)
+**Version :** 0.2 (Document de travail)
+
+## Historique des versions
+
+| Version | Date | Description |
+| --- | --- | --- |
+| 0.1 | — | Rédaction initiale de la spécification fonctionnelle. |
+| 0.2 | 2026-07-03 | Intégration des décisions validées avec l'équipe de développement : phasage en lots, stratégie hors ligne, sources de données produits (Open Food Facts, CIQUAL), horaires de repas, suppression du statut « réservé », propriété des recettes par foyer, versioning des recettes par snapshot, facteurs de conversion par produit, authentification. |
 
 ---
 
@@ -210,6 +217,22 @@ L'objectif est d'assister l'utilisateur dans ses choix sans jamais les imposer.
 
 ---
 
+## Phasage de réalisation (validé)
+
+Afin de permettre une mise en service progressive et une utilisation réelle au plus tôt, la réalisation est découpée en lots :
+
+* **Lot 1** : authentification, foyer (membres, invitations), catalogue produits, gestion du stock (emplacements, DLC, historique), scan de code-barres.
+* **Lot 2** : recettes, planning des repas, validation des repas (consommation du stock).
+* **Lot 3** : génération et gestion de la liste de courses, validation des achats.
+* **Lot 4** : suivi nutritionnel, moteur de recommandation, notifications push, mode automatique.
+* **Lot 5** : mode hors ligne avancé, collaboration multi-utilisateur en temps réel.
+
+Le flux prioritaire à couvrir de bout en bout est le suivant :
+
+> Entrer ses produits → construire ses recettes → planifier ses repas → générer automatiquement la liste de courses → mettre à jour le stock à la validation des repas.
+
+---
+
 # 3. Contraintes techniques
 
 Le projet devra être conçu selon une architecture moderne, modulaire et facilement déployable.
@@ -254,6 +277,7 @@ Il correspond à un ensemble d’utilisateurs partageant un même stock alimenta
 * nom du foyer
 * liste des utilisateurs membres
 * paramètres globaux (unités, langue, etc.)
+* horaires par défaut de chaque type de repas (surchargeables ponctuellement sur un repas planifié)
 * règles de partage des données
 
 ### Remarques
@@ -306,6 +330,7 @@ Exemples :
 * nom
 * catégorie alimentaire
 * unité principale (grammes, litres, unité, etc.)
+* facteurs de conversion optionnels (masse d'une unité, densité) permettant les conversions entre unités (ex. : 1 œuf ≈ 50 g)
 * informations nutritionnelles de base (optionnel)
 * allergènes
 * contraintes de conservation générales
@@ -361,7 +386,9 @@ Chaque entrée de stock est une instance indépendante :
 * date d’ajout
 * date de péremption (si applicable)
 * emplacement de stockage
-* statut (disponible, réservé, consommé, jeté)
+* statut (disponible, consommé, jeté)
+
+> Il n'existe pas de statut « réservé » : la planification n'a jamais d'effet sur le stock (voir règle 5.1). Les besoins futurs sont évalués par simulation de disponibilité, sans marquage des lots.
 
 ### Remarque importante
 
@@ -419,6 +446,11 @@ La recette représente une préparation culinaire composée d’ingrédients et 
 * tags (végétarien, rapide, économique, etc.)
 * informations nutritionnelles calculées
 
+### Remarques
+
+* Une recette appartient à un foyer. Son utilisation dans un autre foyer se fait par copie (voir 7.17).
+* Lors de la planification d'un repas, un instantané (snapshot) des ingrédients et quantités de la recette est conservé : les modifications ultérieures de la recette n'affectent pas les repas déjà planifiés (voir 7.3).
+
 ---
 
 ## 4.8 Ingrédient de recette
@@ -473,7 +505,8 @@ Représente un repas à une date donnée.
 
 * date
 * type (petit déjeuner, déjeuner, dîner, etc.)
-* liste de recettes associées
+* heure prévue (héritée des horaires par défaut du foyer pour ce type de repas, surchargeable)
+* liste de recettes associées (sous forme de snapshots, voir 7.3)
 * statut (planifié, réalisé, annulé, modifié)
 
 ---
@@ -569,7 +602,7 @@ Un repas planifié **ne consomme jamais de stock tant qu’il n’est pas valid�
 
 ### Processus de validation
 
-1. L’heure prévue du repas est atteinte
+1. L’heure prévue du repas est atteinte (horaire par défaut défini au niveau du foyer pour chaque type de repas, surchargeable sur le repas)
 2. Une notification est envoyée à l’utilisateur (si activée)
 3. L’utilisateur choisit une action :
 
@@ -1336,7 +1369,10 @@ Une recette est modifiée après avoir été utilisée dans un planning.
 
 * Les repas déjà planifiés conservent la version initiale de la recette
 * Les nouvelles modifications s’appliquent uniquement aux futurs usages
-* Une versioning implicite des recettes est maintenue
+
+## Mécanisme retenu
+
+Le versioning est assuré par **snapshot** : lors de la planification, une copie figée des ingrédients, quantités et informations de la recette est attachée au repas planifié. Il n'y a pas d'historique complet des versions de recette.
 
 ---
 
@@ -1436,6 +1472,14 @@ L’utilisateur utilise l’application sans connexion réseau.
   * la version serveur est prioritaire
   * une résolution utilisateur peut être demandée
 
+## Stratégie retenue
+
+Le projet ne vise pas une architecture « offline-first » complète :
+
+* consultation des données déjà synchronisées (cache de lecture) ;
+* mise en file d'attente des actions simples (cocher un article de courses, déclarer une consommation) rejouées au retour de la connexion ;
+* les opérations complexes (génération de courses, édition de recettes) nécessitent une connexion.
+
 ---
 
 # 7.10 Scan de produit inconnu
@@ -1451,6 +1495,11 @@ Le système propose :
 * création d’un produit manuel
 * recherche alternative
 * import de données externes (si disponible)
+
+## Sources de données retenues
+
+* **Open Food Facts** : identification par code-barres, données nutritionnelles, marques, allergènes, images des références commerciales.
+* **CIQUAL (ANSES)** : données nutritionnelles des produits génériques.
 
 ---
 
@@ -1553,8 +1602,12 @@ Une recette est utilisée dans plusieurs foyers.
 
 ## Comportement attendu
 
-* chaque foyer possède sa propre instance planifiée
+Une recette appartient à un seul foyer. Son utilisation dans un autre foyer se fait par **copie** :
+
+* chaque foyer possède sa propre copie indépendante de la recette
 * les modifications de recette n’impactent pas les autres foyers
+
+Ce mécanisme de copie servira également de base à une éventuelle bibliothèque de recettes publiques (évolution future).
 
 
 # 8. Description fonctionnelle des parcours et écrans
@@ -2049,7 +2102,13 @@ Les données personnelles et les données relatives aux foyers devront être pro
 
 L'authentification, les autorisations et la protection des échanges devront être adaptées aux usages attendus.
 
-Les choix techniques relèvent de l'équipe de développement.
+Choix validés pour la première version :
+
+* authentification par email / mot de passe ;
+* invitation dans un foyer via un lien ou un code ;
+* les fournisseurs OAuth (Google, Apple, etc.) pourront être ajoutés ultérieurement.
+
+Les autres choix techniques relèvent de l'équipe de développement.
 
 ---
 
@@ -2102,6 +2161,12 @@ L'interface devra donc être développée à l'aide d'éléments temporaires (pl
 La charte graphique devra être centralisée afin de permettre la modification des couleurs, des typographies, des icônes ou d'autres éléments d'identité visuelle sans nécessiter de modifications importantes dans le code de l'application.
 
 L'objectif est de pouvoir définir ou faire évoluer l'identité visuelle du produit à tout moment du projet avec un impact minimal sur le développement.
+
+## 10.9 Langue
+
+L'application est développée en français uniquement dans un premier temps.
+
+Les libellés devront néanmoins être centralisés (structure d'internationalisation légère) afin de permettre l'ajout ultérieur d'autres langues sans refonte.
 
 
 # 11. Questions ouvertes et sujets de conception
