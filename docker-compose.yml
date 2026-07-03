@@ -11,7 +11,8 @@ services:
       POSTGRES_PASSWORD: cooking
       POSTGRES_DB: cooking
     ports:
-      - '5432:5432'
+      # 5434 côté hôte : 5432 est occupé par d'autres projets sur la machine de dev
+      - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
