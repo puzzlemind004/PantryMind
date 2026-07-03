@@ -8,7 +8,7 @@ export default class AccessTokensController {
     const { email, password } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)
-    const token = await User.accessTokens.create(user)
+    const token = await User.accessTokens.create(user, ['*'], { expiresIn: '30 days' })
 
     return serialize({
       user: UserTransformer.transform(user),
