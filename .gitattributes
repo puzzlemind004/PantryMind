@@ -1,0 +1,13 @@
+# Normalise les fins de ligne : LF dans le dépôt et dans la copie de travail.
+* text=auto eol=lf
+
+# Fichiers Windows qui exigent CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaires
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

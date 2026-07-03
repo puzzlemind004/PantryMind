@@ -1,0 +1,23 @@
+# Dépendances
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Environnements
+.env
+.env.*
+!.env.example
+
+# Logs et caches
+*.log
+.cache/
+coverage/
+
+# IDE / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
