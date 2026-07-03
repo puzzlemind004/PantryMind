@@ -1,0 +1,33 @@
+/*
+ * Charte graphique centralisée (spec §10.8).
+ *
+ * Palette temporaire (placeholder) : l'identité visuelle définitive du produit
+ * n'existe pas encore. Tous les composants consomment exclusivement ces tokens
+ * sémantiques — redéfinir ce fichier suffit à rethémer l'application.
+ */
+@theme {
+  /* Typographie */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Couleurs de marque */
+  --color-primary: oklch(0.58 0.15 155);
+  --color-primary-strong: oklch(0.46 0.14 155);
+  --color-primary-soft: oklch(0.95 0.04 155);
+  --color-on-primary: #ffffff;
+
+  /* Surfaces et texte */
+  --color-surface: oklch(0.985 0.003 155);
+  --color-surface-raised: #ffffff;
+  --color-ink: oklch(0.25 0.02 260);
+  --color-muted: oklch(0.52 0.02 260);
+  --color-line: oklch(0.91 0.006 260);
+
+  /* Couleurs d'état */
+  --color-success: oklch(0.58 0.15 155);
+  --color-warning: oklch(0.72 0.15 75);
+  --color-danger: oklch(0.55 0.2 27);
+
+  /* Formes */
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+}
