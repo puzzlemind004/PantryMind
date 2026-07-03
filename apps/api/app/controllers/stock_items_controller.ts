@@ -1,9 +1,18 @@
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 
-/** VineJS date() values arrive as Date or ISO string depending on input. */
-function toDateTime(value: Date | string) {
-  return value instanceof Date ? DateTime.fromJSDate(value) : DateTime.fromISO(value)
+/**
+ * VineJS date() output is typed DateTime but arrives as an ISO string or
+ * Date at runtime — normalize defensively.
+ */
+function toDateTime(value: unknown): DateTime {
+  if (DateTime.isDateTime(value)) {
+    return value
+  }
+  if (value instanceof Date) {
+    return DateTime.fromJSDate(value)
+  }
+  return DateTime.fromISO(String(value))
 }
 
 import Product from '#models/product'

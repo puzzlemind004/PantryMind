@@ -3,7 +3,6 @@ import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 
 import Product from '#models/product'
-import StockItem from '#models/stock_item'
 import StockMovement from '#models/stock_movement'
 import User from '#models/user'
 import HouseholdService from '#services/household_service'
@@ -141,7 +140,7 @@ test.group('Stock | lifecycle', (group) => {
   })
 
   test('viewer can read the stock but not modify it', async ({ client }) => {
-    const { user, household, product } = await setup()
+    const { household, product } = await setup()
     const viewer = await User.create({ email: 'lea@example.com', password: 'secret-password' })
     const { default: HouseholdMember } = await import('#models/household_member')
     await HouseholdMember.create({ householdId: household.id, userId: viewer.id, role: 'viewer' })
