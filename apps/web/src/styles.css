@@ -8,3 +8,71 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+/* Primitives UI partagées — stylées uniquement via les design tokens. */
+@layer components {
+  .card {
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    padding: --spacing(4);
+  }
+
+  .input {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface-raised);
+    padding: --spacing(2.5) --spacing(3);
+    font-size: 1rem;
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: --spacing(2);
+    width: 100%;
+    border-radius: var(--radius-control);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    padding: --spacing(3) --spacing(4);
+    font-weight: 600;
+    transition: background-color 150ms;
+
+    &:active {
+      background-color: var(--color-primary-strong);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: --spacing(2);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-surface-raised);
+    padding: --spacing(2) --spacing(3);
+    font-weight: 500;
+    transition: background-color 150ms;
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  .error-text {
+    color: var(--color-danger);
+    font-size: 0.875rem;
+  }
+}
