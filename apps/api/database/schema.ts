@@ -7,19 +7,29 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class ActivityLogSchema extends BaseModel {
+  static $columns = ['action', 'createdAt', 'data', 'householdId', 'id', 'subjectId', 'subjectType', 'userId'] as const
+  $columns = ActivityLogSchema.$columns
+  @column()
+  declare action: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare data: any
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare subjectId: string | null
+  @column()
+  declare subjectType: string | null
+  @column()
+  declare userId: string | null
+}
+
 export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = [
-    'abilities',
-    'createdAt',
-    'expiresAt',
-    'hash',
-    'id',
-    'lastUsedAt',
-    'name',
-    'tokenableId',
-    'type',
-    'updatedAt',
-  ] as const
+  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
   @column()
   declare abilities: string
@@ -36,7 +46,102 @@ export class AuthAccessTokenSchema extends BaseModel {
   @column()
   declare name: string | null
   @column()
-  declare tokenableId: number
+  declare tokenableId: string
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class HouseholdInvitationSchema extends BaseModel {
+  static $columns = ['code', 'createdAt', 'createdBy', 'expiresAt', 'householdId', 'id', 'revokedAt', 'role', 'updatedAt'] as const
+  $columns = HouseholdInvitationSchema.$columns
+  @column()
+  declare code: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: string | null
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare revokedAt: DateTime | null
+  @column()
+  declare role: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class HouseholdMemberSchema extends BaseModel {
+  static $columns = ['createdAt', 'householdId', 'id', 'role', 'updatedAt', 'userId'] as const
+  $columns = HouseholdMemberSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare role: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
+export class HouseholdSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'name', 'settings', 'updatedAt'] as const
+  $columns = HouseholdSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare settings: any
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class MealTypeSchema extends BaseModel {
+  static $columns = ['createdAt', 'defaultTime', 'householdId', 'id', 'name', 'position', 'updatedAt'] as const
+  $columns = MealTypeSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare defaultTime: string
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare position: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class StorageLocationSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'householdId', 'id', 'name', 'position', 'type', 'updatedAt'] as const
+  $columns = StorageLocationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare position: number
   @column()
   declare type: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
@@ -53,7 +158,7 @@ export class UserSchema extends BaseModel {
   @column()
   declare fullName: string | null
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
   @column({ serializeAs: null })
   declare password: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })

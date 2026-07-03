@@ -4,7 +4,9 @@ import { compose } from '@adonisjs/core/helpers'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { type AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 
-export default class User extends compose(UserSchema, withAuthFinder(hash)) {
+import { withUuidPrimaryKey } from '#models/mixins/with_uuid'
+
+export default class User extends compose(UserSchema, withAuthFinder(hash), withUuidPrimaryKey) {
   static accessTokens = DbAccessTokensProvider.forModel(User)
   declare currentAccessToken?: AccessToken
 
