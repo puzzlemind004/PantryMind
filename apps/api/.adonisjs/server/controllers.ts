@@ -5,6 +5,11 @@
 
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
+  HouseholdInvitations: () => import('#controllers/household_invitations_controller'),
+  HouseholdMembers: () => import('#controllers/household_members_controller'),
+  Households: () => import('#controllers/households_controller'),
+  MealTypes: () => import('#controllers/meal_types_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  StorageLocations: () => import('#controllers/storage_locations_controller'),
 }

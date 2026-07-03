@@ -5,9 +5,39 @@
 
 /// <reference path="./manifest.d.ts" />
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
+import type HouseholdInvitationTransformer from '#transformers/household_invitation_transformer'
+import type HouseholdMemberTransformer from '#transformers/household_member_transformer'
+import type HouseholdMembershipTransformer from '#transformers/household_membership_transformer'
+import type HouseholdTransformer from '#transformers/household_transformer'
+import type MealTypeTransformer from '#transformers/meal_type_transformer'
+import type StorageLocationTransformer from '#transformers/storage_location_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 
 export namespace Data {
+  export type HouseholdInvitation = InferData<HouseholdInvitationTransformer>
+  export namespace HouseholdInvitation {
+    export type Variants = InferVariants<HouseholdInvitationTransformer>
+  }
+  export type HouseholdMember = InferData<HouseholdMemberTransformer>
+  export namespace HouseholdMember {
+    export type Variants = InferVariants<HouseholdMemberTransformer>
+  }
+  export type HouseholdMembership = InferData<HouseholdMembershipTransformer>
+  export namespace HouseholdMembership {
+    export type Variants = InferVariants<HouseholdMembershipTransformer>
+  }
+  export type Household = InferData<HouseholdTransformer>
+  export namespace Household {
+    export type Variants = InferVariants<HouseholdTransformer>
+  }
+  export type MealType = InferData<MealTypeTransformer>
+  export namespace MealType {
+    export type Variants = InferVariants<MealTypeTransformer>
+  }
+  export type StorageLocation = InferData<StorageLocationTransformer>
+  export namespace StorageLocation {
+    export type Variants = InferVariants<StorageLocationTransformer>
+  }
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
