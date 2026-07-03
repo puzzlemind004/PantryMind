@@ -1,0 +1,24 @@
+# Reverse proxy + fichiers statiques du front.
+# SITE_ADDRESS : nom de domaine (TLS Let's Encrypt automatique)
+# ou ":80" pour un accès direct par IP sans TLS.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# API AdonisJS
+	handle /api/* {
+		reverse_proxy api:3333
+	}
+
+	# PWA Angular : fichiers statiques + fallback SPA sur index.html
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Le service worker et le manifeste ne doivent jamais être servis
+	# depuis un cache HTTP obsolète.
+	header /ngsw-worker.js Cache-Control "no-cache"
+	header /ngsw.json Cache-Control "no-cache"
+	header /manifest.webmanifest Cache-Control "no-cache"
+}

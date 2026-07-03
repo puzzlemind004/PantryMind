@@ -10,6 +10,7 @@ build/
 .env.*
 !.env.example
 !.env.test
+!.env.production.example
 
 # Logs et caches
 *.log

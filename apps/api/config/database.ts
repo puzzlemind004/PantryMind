@@ -41,8 +41,10 @@ const dbConfig = defineConfig({
       schemaGeneration: {
         /**
          * Regenerate database/schema.ts model classes after migrations.
+         * Dev-only: the generated file is committed, production containers
+         * must not try to rewrite source files.
          */
-        enabled: true,
+        enabled: app.inDev,
 
         /**
          * Custom schema rules file paths.

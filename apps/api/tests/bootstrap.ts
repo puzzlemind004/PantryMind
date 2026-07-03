@@ -7,17 +7,14 @@ import { dbAssertions } from '@adonisjs/lucid/plugins/db'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { authApiClient } from '@adonisjs/auth/plugins/api_client'
 import { sessionApiClient } from '@adonisjs/session/plugins/api_client'
-import type { Registry } from '../.adonisjs/client/registry/schema.d.ts'
 
 /**
- * This file is imported by the "bin/test.ts" entrypoint file
- */
-declare module '@japa/api-client/types' {
-  interface RoutesRegistry extends Registry {}
-}
-
-/**
- * This file is imported by the "bin/test.ts" entrypoint file
+ * This file is imported by the "bin/test.ts" entrypoint file.
+ *
+ * Note: the kit's typed RoutesRegistry augmentation is intentionally not
+ * used — response.body() stays untyped and the tests assert shapes
+ * explicitly (the generated registry types would otherwise break tsc on
+ * every route change).
  */
 
 /**
