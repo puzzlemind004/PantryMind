@@ -97,6 +97,18 @@ router
             router.delete('meal-types/:mealTypeId', [controllers.MealTypes, 'destroy'])
           })
           .use(middleware.household({ role: 'member' }))
+
+        // Product catalogue (spec §6.2): household products + global catalogue
+        router.get('products', [controllers.Products, 'index'])
+        router.get('products/:productId', [controllers.Products, 'show'])
+        router
+          .group(() => {
+            router.post('products', [controllers.Products, 'store'])
+            router.patch('products/:productId', [controllers.Products, 'update'])
+            router.post('product-references', [controllers.ProductReferences, 'store'])
+            router.get('barcode/:barcode', [controllers.ProductReferences, 'lookupBarcode'])
+          })
+          .use(middleware.household({ role: 'member' }))
       })
       .prefix('households/:householdId')
       .as('household')

@@ -1,7 +1,15 @@
+import pg from 'pg'
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
 
 import env from '#start/env'
+
+/**
+ * Parse PostgreSQL numeric columns as JS numbers (quantities use at most
+ * 3 decimals — far within float64 precision). Without this, pg returns
+ * strings for numeric/decimal columns.
+ */
+pg.types.setTypeParser(pg.types.builtins.NUMERIC, (value: string) => Number.parseFloat(value))
 
 const dbConfig = defineConfig({
   connection: 'pg',
@@ -28,6 +36,18 @@ const dbConfig = defineConfig({
          * Paths containing migration files.
          */
         paths: ['database/migrations'],
+      },
+
+      schemaGeneration: {
+        /**
+         * Regenerate database/schema.ts model classes after migrations.
+         */
+        enabled: true,
+
+        /**
+         * Custom schema rules file paths.
+         */
+        rulesPaths: ['./database/schema_rules.js'],
       },
 
       debug: app.inDev,

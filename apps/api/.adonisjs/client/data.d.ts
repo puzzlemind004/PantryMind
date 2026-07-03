@@ -10,6 +10,8 @@ import type HouseholdMemberTransformer from '#transformers/household_member_tran
 import type HouseholdMembershipTransformer from '#transformers/household_membership_transformer'
 import type HouseholdTransformer from '#transformers/household_transformer'
 import type MealTypeTransformer from '#transformers/meal_type_transformer'
+import type ProductReferenceTransformer from '#transformers/product_reference_transformer'
+import type ProductTransformer from '#transformers/product_transformer'
 import type StorageLocationTransformer from '#transformers/storage_location_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 
@@ -33,6 +35,14 @@ export namespace Data {
   export type MealType = InferData<MealTypeTransformer>
   export namespace MealType {
     export type Variants = InferVariants<MealTypeTransformer>
+  }
+  export type ProductReference = InferData<ProductReferenceTransformer>
+  export namespace ProductReference {
+    export type Variants = InferVariants<ProductReferenceTransformer>
+  }
+  export type Product = InferData<ProductTransformer>
+  export namespace Product {
+    export type Variants = InferVariants<ProductTransformer>
   }
   export type StorageLocation = InferData<StorageLocationTransformer>
   export namespace StorageLocation {

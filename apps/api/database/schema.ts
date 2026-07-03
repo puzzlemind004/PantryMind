@@ -127,6 +127,66 @@ export class MealTypeSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProductReferenceSchema extends BaseModel {
+  static $columns = ['barcode', 'brand', 'createdAt', 'id', 'imageUrl', 'name', 'nutritionPer100', 'packageQuantity', 'packageUnit', 'productId', 'shelfLifeDays', 'source', 'updatedAt'] as const
+  $columns = ProductReferenceSchema.$columns
+  @column()
+  declare barcode: string | null
+  @column()
+  declare brand: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare imageUrl: string | null
+  @column()
+  declare name: string
+  @column()
+  declare nutritionPer100: any | null
+  @column()
+  declare packageQuantity: number | null
+  @column()
+  declare packageUnit: string | null
+  @column()
+  declare productId: string
+  @column()
+  declare shelfLifeDays: number | null
+  @column()
+  declare source: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ProductSchema extends BaseModel {
+  static $columns = ['allergens', 'category', 'ciqualCode', 'createdAt', 'defaultUnit', 'densityGPerMl', 'householdId', 'id', 'name', 'nutritionPer100', 'unitWeightGrams', 'updatedAt'] as const
+  $columns = ProductSchema.$columns
+  @column()
+  declare allergens: any
+  @column()
+  declare category: string | null
+  @column()
+  declare ciqualCode: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare defaultUnit: string
+  @column()
+  declare densityGPerMl: number | null
+  @column()
+  declare householdId: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare nutritionPer100: any | null
+  @column()
+  declare unitWeightGrams: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class StorageLocationSchema extends BaseModel {
   static $columns = ['createdAt', 'description', 'householdId', 'id', 'name', 'position', 'type', 'updatedAt'] as const
   $columns = StorageLocationSchema.$columns
