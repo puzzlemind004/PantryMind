@@ -109,6 +109,18 @@ router
             router.get('barcode/:barcode', [controllers.ProductReferences, 'lookupBarcode'])
           })
           .use(middleware.household({ role: 'member' }))
+
+        // Stock: physical lots, FIFO, full traceability (spec §4.5, §6.1)
+        router.get('stock-items', [controllers.StockItems, 'index'])
+        router.get('stock-items/:itemId/movements', [controllers.StockItems, 'movements'])
+        router
+          .group(() => {
+            router.post('stock-items', [controllers.StockItems, 'store'])
+            router.patch('stock-items/:itemId', [controllers.StockItems, 'update'])
+            router.post('stock-items/:itemId/consume', [controllers.StockItems, 'consume'])
+            router.post('stock-items/:itemId/discard', [controllers.StockItems, 'discard'])
+          })
+          .use(middleware.household({ role: 'member' }))
       })
       .prefix('households/:householdId')
       .as('household')

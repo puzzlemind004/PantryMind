@@ -13,5 +13,6 @@ export const controllers = {
   ProductReferences: () => import('#controllers/product_references_controller'),
   Products: () => import('#controllers/products_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  StockItems: () => import('#controllers/stock_items_controller'),
   StorageLocations: () => import('#controllers/storage_locations_controller'),
 }

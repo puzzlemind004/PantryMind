@@ -187,6 +187,60 @@ export class ProductSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class StockItemSchema extends BaseModel {
+  static $columns = ['addedAt', 'createdAt', 'expiresAt', 'householdId', 'id', 'productId', 'productReferenceId', 'quantity', 'status', 'storageLocationId', 'unit', 'updatedAt', 'version'] as const
+  $columns = StockItemSchema.$columns
+  @column.dateTime()
+  declare addedAt: DateTime
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare expiresAt: DateTime | null
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare productId: string
+  @column()
+  declare productReferenceId: string | null
+  @column()
+  declare quantity: number
+  @column()
+  declare status: string
+  @column()
+  declare storageLocationId: string | null
+  @column()
+  declare unit: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare version: number
+}
+
+export class StockMovementSchema extends BaseModel {
+  static $columns = ['context', 'createdAt', 'householdId', 'id', 'quantityDelta', 'stockItemId', 'type', 'unit', 'userId'] as const
+  $columns = StockMovementSchema.$columns
+  @column()
+  declare context: any
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare quantityDelta: number
+  @column()
+  declare stockItemId: string
+  @column()
+  declare type: string
+  @column()
+  declare unit: string
+  @column()
+  declare userId: string | null
+}
+
 export class StorageLocationSchema extends BaseModel {
   static $columns = ['createdAt', 'description', 'householdId', 'id', 'name', 'position', 'type', 'updatedAt'] as const
   $columns = StorageLocationSchema.$columns

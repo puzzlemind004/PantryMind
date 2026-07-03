@@ -12,6 +12,8 @@ import type HouseholdTransformer from '#transformers/household_transformer'
 import type MealTypeTransformer from '#transformers/meal_type_transformer'
 import type ProductReferenceTransformer from '#transformers/product_reference_transformer'
 import type ProductTransformer from '#transformers/product_transformer'
+import type StockItemTransformer from '#transformers/stock_item_transformer'
+import type StockMovementTransformer from '#transformers/stock_movement_transformer'
 import type StorageLocationTransformer from '#transformers/storage_location_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 
@@ -43,6 +45,14 @@ export namespace Data {
   export type Product = InferData<ProductTransformer>
   export namespace Product {
     export type Variants = InferVariants<ProductTransformer>
+  }
+  export type StockItem = InferData<StockItemTransformer>
+  export namespace StockItem {
+    export type Variants = InferVariants<StockItemTransformer>
+  }
+  export type StockMovement = InferData<StockMovementTransformer>
+  export namespace StockMovement {
+    export type Variants = InferVariants<StockMovementTransformer>
   }
   export type StorageLocation = InferData<StorageLocationTransformer>
   export namespace StorageLocation {
