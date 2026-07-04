@@ -28,7 +28,7 @@ git clone <url-du-depot> /opt/cooking && cd /opt/cooking
 
 cp .env.production.example .env.production
 openssl rand -base64 32   # → valeur pour APP_KEY
-nano .env.production      # APP_KEY, SITE_ADDRESS, APP_URL, DB_PASSWORD
+nano .env.production      # COOKING_APP_KEY, COOKING_SITE_ADDRESS, COOKING_APP_URL, COOKING_DB_PASSWORD
 
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
@@ -46,10 +46,10 @@ Si le VPS héberge déjà des sites via un nginx (ou autre) qui occupe 80/443,
 ne pas laisser Caddy prendre ces ports. Dans `.env.production` :
 
 ```env
-SITE_ADDRESS=:80
-APP_URL=https://cooking.mondomaine.fr
-WEB_BIND=127.0.0.1:8080
-WEB_TLS_BIND=127.0.0.1:8443
+COOKING_SITE_ADDRESS=:80
+COOKING_APP_URL=https://cooking.mondomaine.fr
+COOKING_WEB_BIND=127.0.0.1:8080
+COOKING_WEB_TLS_BIND=127.0.0.1:8443
 ```
 
 Caddy sert alors l'application en HTTP simple sur `127.0.0.1:8080` et le
