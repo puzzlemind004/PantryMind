@@ -112,7 +112,28 @@ docker compose -f docker-compose.prod.yml logs -f web
 docker exec -it cooking-prod-postgres-1 psql -U cooking cooking
 ```
 
-## 6. Production actuelle
+## 6. CI/CD — déploiement automatique
+
+Le workflow [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)
+s'exécute à chaque push :
+
+1. **Tests API** (PostgreSQL en service container, typecheck, lint, Japa)
+   et **build front** (tests unitaires + compilation) — sur les push
+   *et* les pull requests ;
+2. **Déploiement** — uniquement quand `main` avance et que les tests
+   passent : SSH vers le VPS avec une clé dédiée, `git reset --hard
+   origin/main`, `docker compose up -d --build`, purge des images
+   orphelines, puis health check HTTP (échec du job si l'app ne répond
+   pas).
+
+Secrets GitHub requis (`gh secret set …`) : `VPS_SSH_KEY` (clé privée
+ed25519 dédiée au déploiement, sans passphrase), `VPS_HOST`, `VPS_USER`.
+La clé publique correspondante doit être dans les `authorized_keys` de
+l'utilisateur de déploiement sur le VPS.
+
+Déployer = pousser sur `main`. Plus aucune intervention sur le serveur.
+
+## 7. Production actuelle
 
 | Élément | Valeur |
 | --- | --- |

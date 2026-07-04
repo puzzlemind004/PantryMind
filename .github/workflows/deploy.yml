@@ -1,0 +1,117 @@
+# CI/CD PantryMind : tests sur chaque push et PR, déploiement automatique
+# sur le VPS quand main est vert. Voir docs/deployment.md §CI/CD.
+name: CI & Déploiement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-api:
+    name: Tests API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cooking
+          POSTGRES_PASSWORD: cooking
+          POSTGRES_DB: cooking_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U cooking -d cooking_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      TZ: UTC
+      PORT: 3333
+      HOST: localhost
+      LOG_LEVEL: fatal
+      APP_KEY: ci-only-app-key-not-a-secret-0000
+      APP_URL: http://localhost:3333
+      SESSION_DRIVER: memory
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5433
+      DB_USER: cooking
+      DB_PASSWORD: cooking
+      DB_DATABASE: cooking_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+  build-web:
+    name: Build front
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watch=false
+      - run: npm run build
+
+  deploy:
+    name: Déploiement VPS
+    runs-on: ubuntu-latest
+    needs: [test-api, build-web]
+    # Jamais sur les PR : uniquement quand main avance.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://pantry.puzzlemind.fr
+    steps:
+      - name: Préparer la clé SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Mettre à jour et redéployer
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s << 'DEPLOY'
+          set -euo pipefail
+          cd /opt/cooking
+          git fetch origin main
+          git reset --hard origin/main
+          docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+          docker image prune -f
+          DEPLOY
+
+      - name: Vérifier la santé de l'application
+        run: |
+          for attempt in $(seq 1 20); do
+            status=$(curl -s -o /dev/null -w '%{http_code}' https://pantry.puzzlemind.fr/ || true)
+            if [ "$status" = "200" ]; then
+              echo "OK : l'application répond (tentative $attempt)"
+              exit 0
+            fi
+            sleep 6
+          done
+          echo "ÉCHEC : l'application ne répond pas après le déploiement"
+          exit 1
