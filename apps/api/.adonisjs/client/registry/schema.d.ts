@@ -571,6 +571,126 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['removeRecipe']>>>
     }
   }
+  'household.shopping_lists.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/shopping-list'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['show']>>>
+    }
+  }
+  'household.product_thresholds.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/product-thresholds'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['index']>>>
+    }
+  }
+  'household.shopping_lists.generate': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/shopping-list/generate'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/shopping').generateShoppingListValidator)>>
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/shopping').generateShoppingListValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['generate']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['generate']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.shopping_lists.add_item': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/shopping-list/items'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/shopping').addShoppingItemValidator)>>
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/shopping').addShoppingItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['addItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['addItem']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.shopping_lists.update_item': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/households/:householdId/shopping-list/items/:itemId'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/shopping').updateShoppingItemValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; itemId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/shopping').updateShoppingItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['updateItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['updateItem']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.shopping_lists.destroy_item': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/households/:householdId/shopping-list/items/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['destroyItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['destroyItem']>>>
+    }
+  }
+  'household.shopping_lists.check_item': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/shopping-list/items/:itemId/check'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/shopping').checkShoppingItemValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; itemId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/shopping').checkShoppingItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['checkItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['checkItem']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.shopping_lists.uncheck_item': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/shopping-list/items/:itemId/uncheck'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['uncheckItem']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/shopping_lists_controller').default['uncheckItem']>>>
+    }
+  }
+  'household.product_thresholds.upsert': {
+    methods: ["PUT"]
+    pattern: '/api/v1/households/:householdId/product-thresholds'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/shopping').upsertThresholdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/shopping').upsertThresholdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['upsert']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['upsert']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.product_thresholds.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/households/:householdId/product-thresholds/:thresholdId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; thresholdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/product_thresholds_controller').default['destroy']>>>
+    }
+  }
   'household.stock_items.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/households/:householdId/stock-items'

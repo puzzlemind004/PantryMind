@@ -51,6 +51,16 @@ export type ScannedRoutes = {
     'household.planned_meals.add_recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.update_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
     'household.planned_meals.remove_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
+    'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.shopping_lists.generate': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.shopping_lists.add_item': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.shopping_lists.update_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.shopping_lists.destroy_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.shopping_lists.check_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.shopping_lists.uncheck_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.product_thresholds.upsert': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.product_thresholds.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'thresholdId': ParamValue} }
     'household.stock_items.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.movements': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.store': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
@@ -74,6 +84,8 @@ export type ScannedRoutes = {
     'household.planned_meals.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.planned_meals.show': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.meal_validations.preview': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.movements': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
   }
@@ -93,6 +105,8 @@ export type ScannedRoutes = {
     'household.planned_meals.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.planned_meals.show': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.meal_validations.preview': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.movements': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
   }
@@ -114,6 +128,10 @@ export type ScannedRoutes = {
     'household.planned_meals.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.duplicate': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.add_recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.shopping_lists.generate': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.shopping_lists.add_item': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.shopping_lists.check_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.shopping_lists.uncheck_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.store': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.consume': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.discard': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
@@ -127,6 +145,7 @@ export type ScannedRoutes = {
     'household.recipes.update': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'recipeId': ParamValue} }
     'household.planned_meals.update': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.update_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
+    'household.shopping_lists.update_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.update': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
   }
   DELETE: {
@@ -137,6 +156,11 @@ export type ScannedRoutes = {
     'household.recipes.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'recipeId': ParamValue} }
     'household.planned_meals.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.remove_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
+    'household.shopping_lists.destroy_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.product_thresholds.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'thresholdId': ParamValue} }
+  }
+  PUT: {
+    'household.product_thresholds.upsert': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

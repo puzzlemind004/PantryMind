@@ -88,6 +88,20 @@ export interface ApiDefinition {
       preview: typeof routes['household.meal_validations.preview']
       complete: typeof routes['household.meal_validations.complete']
     }
+    shoppingLists: {
+      show: typeof routes['household.shopping_lists.show']
+      generate: typeof routes['household.shopping_lists.generate']
+      addItem: typeof routes['household.shopping_lists.add_item']
+      updateItem: typeof routes['household.shopping_lists.update_item']
+      destroyItem: typeof routes['household.shopping_lists.destroy_item']
+      checkItem: typeof routes['household.shopping_lists.check_item']
+      uncheckItem: typeof routes['household.shopping_lists.uncheck_item']
+    }
+    productThresholds: {
+      index: typeof routes['household.product_thresholds.index']
+      upsert: typeof routes['household.product_thresholds.upsert']
+      destroy: typeof routes['household.product_thresholds.destroy']
+    }
     stockItems: {
       index: typeof routes['household.stock_items.index']
       movements: typeof routes['household.stock_items.movements']
