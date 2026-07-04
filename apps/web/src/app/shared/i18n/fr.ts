@@ -216,7 +216,22 @@ export const fr = {
 
   shopping: {
     title: 'Courses',
-    comingSoon: 'La liste de courses automatique arrive au Lot 3.',
+    generate: 'Générer la liste',
+    generatedAt: 'Générée {when}',
+    empty: 'Liste vide. Planifiez des repas puis générez, ou ajoutez un article.',
+    toBuy: 'À acheter',
+    inCart: 'Dans le panier',
+    packages: '{count} × {name}',
+    sources: {
+      planning: 'Planning',
+      min_stock: 'Stock min',
+      manual: 'Manuel',
+    },
+    addManual: 'Ajouter un article',
+    thresholds: 'Seuils de réapprovisionnement',
+    thresholdHint: 'Sous ce seuil, le produit est ajouté automatiquement à la liste.',
+    minQuantity: 'Quantité minimum',
+    addThreshold: 'Ajouter un seuil',
   },
 
   profile: {

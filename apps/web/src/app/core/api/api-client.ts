@@ -40,6 +40,12 @@ export class ApiClient {
       .pipe(map((envelope) => envelope.data));
   }
 
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.http
+      .put<ApiEnvelope<T>>(`${this.baseUrl}${path}`, body)
+      .pipe(map((envelope) => envelope.data));
+  }
+
   delete(path: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}${path}`);
   }

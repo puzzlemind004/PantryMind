@@ -245,6 +245,41 @@ export interface MealCompletionResult {
   missing: number;
 }
 
+export interface ShoppingListItem {
+  id: string;
+  productId: string;
+  productName: string;
+  neededQuantity: number;
+  unit: Unit;
+  source: 'planning' | 'min_stock' | 'manual';
+  packageCount: number | null;
+  packaging: {
+    referenceId: string;
+    name: string;
+    brand: string | null;
+    packageQuantity: number | null;
+    packageUnit: Unit | null;
+  } | null;
+  checkedAt: string | null;
+}
+
+export interface ShoppingList {
+  id: string;
+  householdId: string;
+  status: 'active' | 'completed';
+  version: number;
+  generatedAt: string | null;
+  items?: ShoppingListItem[];
+}
+
+export interface ProductThreshold {
+  id: string;
+  productId: string;
+  productName: string;
+  minQuantity: number;
+  unit: Unit;
+}
+
 export interface StockMovement {
   id: string;
   stockItemId: string;

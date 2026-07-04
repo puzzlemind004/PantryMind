@@ -46,8 +46,8 @@ export const routes: Routes = [
       },
       {
         path: 'shopping',
-        loadComponent: () => import('./shared/ui/coming-soon').then((m) => m.ComingSoon),
-        data: { titleKey: 'shopping.title', messageKey: 'shopping.comingSoon' },
+        loadComponent: () =>
+          import('./features/shopping/shopping-page').then((m) => m.ShoppingPage),
       },
       {
         path: 'profile',
