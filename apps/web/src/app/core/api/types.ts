@@ -140,6 +140,111 @@ export interface StockItem {
   storageLocation?: StorageLocation;
 }
 
+export interface RecipeIngredient {
+  id: string;
+  productId: string;
+  quantity: number;
+  unit: Unit;
+  optional: boolean;
+  note: string | null;
+  position: number;
+  product?: {
+    id: string;
+    name: string;
+    category: string | null;
+    defaultUnit: Unit;
+    unitWeightGrams: number | null;
+    densityGPerMl: number | null;
+  };
+  substitutes?: { productId: string; product?: { id: string; name: string } }[];
+}
+
+export interface Recipe {
+  id: string;
+  householdId: string;
+  name: string;
+  description: string | null;
+  servings: number;
+  prepMinutes: number | null;
+  cookMinutes: number | null;
+  steps: string[];
+  tags: string[];
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  ingredients?: RecipeIngredient[];
+}
+
+export interface RecipeFeasibility {
+  servings: number;
+  feasible: boolean;
+  ingredients: {
+    recipeIngredientId: string;
+    productId: string;
+    productName: string;
+    unit: Unit;
+    optional: boolean;
+    required: number;
+    available: number;
+    missing: number;
+  }[];
+}
+
+export type PlannedMealStatus = 'planned' | 'done' | 'cancelled';
+
+export interface MealRecipeSnapshot {
+  name: string;
+  baseServings: number;
+  ingredients: {
+    productId: string;
+    productName: string;
+    quantity: number;
+    unit: Unit;
+    optional: boolean;
+    substitutes: { productId: string; productName: string }[];
+  }[];
+}
+
+export interface PlannedMealRecipe {
+  id: string;
+  recipeId: string | null;
+  servings: number;
+  snapshot: MealRecipeSnapshot;
+}
+
+export interface PlannedMeal {
+  id: string;
+  householdId: string;
+  mealTypeId: string | null;
+  mealName: string;
+  date: string;
+  timeOverride: string | null;
+  effectiveTime: string | null;
+  status: PlannedMealStatus;
+  notes: string | null;
+  version: number;
+  recipes?: PlannedMealRecipe[];
+}
+
+export interface MealNeed {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unit: Unit;
+  optional: boolean;
+  available: number;
+  missing: number;
+  substitutes: { productId: string; productName: string; available: number }[];
+}
+
+export interface MealCompletionResult {
+  productId: string;
+  requested: number;
+  unit: Unit;
+  consumed: number;
+  missing: number;
+}
+
 export interface StockMovement {
   id: string;
   stockItemId: string;
