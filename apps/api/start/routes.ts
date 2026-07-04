@@ -149,6 +149,9 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // Recommendations: transparent suggestions (spec §6.7, 9.5)
+        router.get('recommendations', [controllers.Recommendations, 'index'])
+
         // Nutrition: recipe, meal and daily summaries (spec §2)
         router.get('recipes/:recipeId/nutrition', [controllers.Nutrition, 'recipe'])
         router.get('planned-meals/:mealId/nutrition', [controllers.Nutrition, 'meal'])

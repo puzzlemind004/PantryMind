@@ -18,6 +18,7 @@ export const controllers = {
   Products: () => import('#controllers/products_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Recipes: () => import('#controllers/recipes_controller'),
+  Recommendations: () => import('#controllers/recommendations_controller'),
   ShoppingLists: () => import('#controllers/shopping_lists_controller'),
   StockItems: () => import('#controllers/stock_items_controller'),
   StorageLocations: () => import('#controllers/storage_locations_controller'),
