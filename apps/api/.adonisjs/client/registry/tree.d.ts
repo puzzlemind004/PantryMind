@@ -63,6 +63,31 @@ export interface ApiDefinition {
       store: typeof routes['household.product_references.store']
       lookupBarcode: typeof routes['household.product_references.lookup_barcode']
     }
+    recipes: {
+      index: typeof routes['household.recipes.index']
+      show: typeof routes['household.recipes.show']
+      feasibility: typeof routes['household.recipes.feasibility']
+      store: typeof routes['household.recipes.store']
+      update: typeof routes['household.recipes.update']
+      destroy: typeof routes['household.recipes.destroy']
+      duplicate: typeof routes['household.recipes.duplicate']
+    }
+    plannedMeals: {
+      index: typeof routes['household.planned_meals.index']
+      show: typeof routes['household.planned_meals.show']
+      store: typeof routes['household.planned_meals.store']
+      update: typeof routes['household.planned_meals.update']
+      destroy: typeof routes['household.planned_meals.destroy']
+      cancel: typeof routes['household.planned_meals.cancel']
+      duplicate: typeof routes['household.planned_meals.duplicate']
+      addRecipe: typeof routes['household.planned_meals.add_recipe']
+      updateRecipe: typeof routes['household.planned_meals.update_recipe']
+      removeRecipe: typeof routes['household.planned_meals.remove_recipe']
+    }
+    mealValidations: {
+      preview: typeof routes['household.meal_validations.preview']
+      complete: typeof routes['household.meal_validations.complete']
+    }
     stockItems: {
       index: typeof routes['household.stock_items.index']
       movements: typeof routes['household.stock_items.movements']

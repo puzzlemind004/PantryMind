@@ -343,6 +343,234 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/product_references_controller').default['lookupBarcode']>>>
     }
   }
+  'household.recipes.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/recipes'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/recipe').listRecipesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.recipes.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['show']>>>
+    }
+  }
+  'household.recipes.feasibility': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId/feasibility'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/recipe').feasibilityValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['feasibility']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['feasibility']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.recipes.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/recipes'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/recipe').createRecipeValidator)>>
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/recipe').createRecipeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.recipes.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/recipe').updateRecipeValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/recipe').updateRecipeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.recipes.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['destroy']>>>
+    }
+  }
+  'household.recipes.duplicate': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId/duplicate'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['duplicate']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recipes_controller').default['duplicate']>>>
+    }
+  }
+  'household.planned_meals.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/planned-meals'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/planning').listPlannedMealsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['show']>>>
+    }
+  }
+  'household.meal_validations.preview': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/preview'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meal_validations_controller').default['preview']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meal_validations_controller').default['preview']>>>
+    }
+  }
+  'household.meal_validations.complete': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/complete'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meal_validations_controller').default['complete']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meal_validations_controller').default['complete']>>>
+    }
+  }
+  'household.planned_meals.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/planned-meals'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').createPlannedMealValidator)>>
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').createPlannedMealValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').updatePlannedMealValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').updatePlannedMealValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['destroy']>>>
+    }
+  }
+  'household.planned_meals.cancel': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/cancel'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').cancelPlannedMealValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').cancelPlannedMealValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['cancel']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['cancel']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.duplicate': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/duplicate'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').duplicatePlannedMealValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').duplicatePlannedMealValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['duplicate']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['duplicate']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.add_recipe': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/recipes'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').addMealRecipeValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').addMealRecipeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['addRecipe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['addRecipe']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.update_recipe': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/recipes/:mealRecipeId'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/planning').updateMealRecipeValidator)>>
+      paramsTuple: [ParamValue, ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue; mealRecipeId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/planning').updateMealRecipeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['updateRecipe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['updateRecipe']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.planned_meals.remove_recipe': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/recipes/:mealRecipeId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue; mealRecipeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['removeRecipe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['removeRecipe']>>>
+    }
+  }
   'household.stock_items.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/households/:householdId/stock-items'
