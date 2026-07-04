@@ -1,4 +1,4 @@
-import { belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 import { ProductSchema } from '#database/schema'
@@ -14,6 +14,9 @@ import type { NutritionPer100 } from '#types/catalog'
  */
 export default class Product extends withUuidPrimaryKey(ProductSchema) {
   declare nutritionPer100: NutritionPer100 | null
+
+  /** jsonb array: needs explicit JSON serialization (pg turns JS arrays into array literals). */
+  @column({ prepare: (value) => JSON.stringify(value ?? []) })
   declare allergens: string[]
 
   @belongsTo(() => Household)

@@ -110,6 +110,19 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // Recipes: templates, never impact the stock (spec §4.7, 5.7)
+        router.get('recipes', [controllers.Recipes, 'index'])
+        router.get('recipes/:recipeId', [controllers.Recipes, 'show'])
+        router.get('recipes/:recipeId/feasibility', [controllers.Recipes, 'feasibility'])
+        router
+          .group(() => {
+            router.post('recipes', [controllers.Recipes, 'store'])
+            router.patch('recipes/:recipeId', [controllers.Recipes, 'update'])
+            router.delete('recipes/:recipeId', [controllers.Recipes, 'destroy'])
+            router.post('recipes/:recipeId/duplicate', [controllers.Recipes, 'duplicate'])
+          })
+          .use(middleware.household({ role: 'member' }))
+
         // Stock: physical lots, FIFO, full traceability (spec §4.5, §6.1)
         router.get('stock-items', [controllers.StockItems, 'index'])
         router.get('stock-items/:itemId/movements', [controllers.StockItems, 'movements'])

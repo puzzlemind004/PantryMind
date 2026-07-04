@@ -1,4 +1,4 @@
-import { belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 import { RecipeSchema } from '#database/schema'
@@ -10,9 +10,16 @@ import RecipeIngredient from '#models/recipe_ingredient'
  * Culinary preparation template (spec §4.7): never impacts the stock by
  * itself (spec 5.7). Household-owned; sharing across households means
  * copying (spec 7.17). Soft-deleted to preserve history (spec 7.16).
+ *
+ * jsonb array columns need an explicit prepare: the pg driver serializes
+ * JS objects to JSON but turns JS arrays into Postgres array literals,
+ * which are invalid jsonb.
  */
 export default class Recipe extends withUuidPrimaryKey(RecipeSchema) {
+  @column({ prepare: (value) => JSON.stringify(value ?? []) })
   declare steps: string[]
+
+  @column({ prepare: (value) => JSON.stringify(value ?? []) })
   declare tags: string[]
 
   @belongsTo(() => Household)
