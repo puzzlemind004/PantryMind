@@ -40,6 +40,44 @@ docker compose -f docker-compose.prod.yml ps
 curl -s https://SITE_ADDRESS/api/v1 -o /dev/null -w '%{http_code}\n'
 ```
 
+## 2 bis. Cohabitation avec un serveur web natif existant
+
+Si le VPS héberge déjà des sites via un nginx (ou autre) qui occupe 80/443,
+ne pas laisser Caddy prendre ces ports. Dans `.env.production` :
+
+```env
+SITE_ADDRESS=:80
+APP_URL=https://cooking.mondomaine.fr
+WEB_BIND=127.0.0.1:8080
+WEB_TLS_BIND=127.0.0.1:8443
+```
+
+Caddy sert alors l'application en HTTP simple sur `127.0.0.1:8080` et le
+proxy natif gère le TLS. Vhost nginx à créer (`/etc/nginx/sites-available/cooking`) :
+
+```nginx
+server {
+    listen 80;
+    server_name cooking.mondomaine.fr;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+```bash
+ln -s /etc/nginx/sites-available/cooking /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d cooking.mondomaine.fr   # TLS pour ce vhost uniquement
+```
+
+Note : le PostgreSQL du compose n'expose aucun port sur l'hôte, il ne
+peut pas entrer en conflit avec une instance PostgreSQL native.
+
 ## 3. Mettre à jour
 
 ```bash

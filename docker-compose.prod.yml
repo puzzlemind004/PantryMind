@@ -50,9 +50,13 @@ services:
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS}
+    # Mode autonome (défaut) : Caddy prend 80/443 et gère le TLS.
+    # Derrière un reverse proxy natif existant (nginx…) : lier en local,
+    # ex. WEB_BIND=127.0.0.1:8080 et WEB_TLS_BIND=127.0.0.1:8443,
+    # avec SITE_ADDRESS=:80 (voir docs/deployment.md §« Cohabitation »).
     ports:
-      - '80:80'
-      - '443:443'
+      - '${WEB_BIND:-80}:80'
+      - '${WEB_TLS_BIND:-443}:443'
     volumes:
       - caddy_data:/data
       - caddy_config:/config
