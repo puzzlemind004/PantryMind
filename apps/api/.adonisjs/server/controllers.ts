@@ -13,9 +13,11 @@ export const controllers = {
   NewAccount: () => import('#controllers/new_account_controller'),
   PlannedMeals: () => import('#controllers/planned_meals_controller'),
   ProductReferences: () => import('#controllers/product_references_controller'),
+  ProductThresholds: () => import('#controllers/product_thresholds_controller'),
   Products: () => import('#controllers/products_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Recipes: () => import('#controllers/recipes_controller'),
+  ShoppingLists: () => import('#controllers/shopping_lists_controller'),
   StockItems: () => import('#controllers/stock_items_controller'),
   StorageLocations: () => import('#controllers/storage_locations_controller'),
 }

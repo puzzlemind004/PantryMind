@@ -149,6 +149,31 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // Shopping list: planning + stock + thresholds (spec 5.13-5.16, §6.5)
+        router.get('shopping-list', [controllers.ShoppingLists, 'show'])
+        router.get('product-thresholds', [controllers.ProductThresholds, 'index'])
+        router
+          .group(() => {
+            router.post('shopping-list/generate', [controllers.ShoppingLists, 'generate'])
+            router.post('shopping-list/items', [controllers.ShoppingLists, 'addItem'])
+            router.patch('shopping-list/items/:itemId', [controllers.ShoppingLists, 'updateItem'])
+            router.delete('shopping-list/items/:itemId', [controllers.ShoppingLists, 'destroyItem'])
+            router.post('shopping-list/items/:itemId/check', [
+              controllers.ShoppingLists,
+              'checkItem',
+            ])
+            router.post('shopping-list/items/:itemId/uncheck', [
+              controllers.ShoppingLists,
+              'uncheckItem',
+            ])
+            router.put('product-thresholds', [controllers.ProductThresholds, 'upsert'])
+            router.delete('product-thresholds/:thresholdId', [
+              controllers.ProductThresholds,
+              'destroy',
+            ])
+          })
+          .use(middleware.household({ role: 'member' }))
+
         // Stock: physical lots, FIFO, full traceability (spec §4.5, §6.1)
         router.get('stock-items', [controllers.StockItems, 'index'])
         router.get('stock-items/:itemId/movements', [controllers.StockItems, 'movements'])

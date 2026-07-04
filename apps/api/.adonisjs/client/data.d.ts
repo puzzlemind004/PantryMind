@@ -15,6 +15,7 @@ import type ProductReferenceTransformer from '#transformers/product_reference_tr
 import type ProductTransformer from '#transformers/product_transformer'
 import type RecipeIngredientTransformer from '#transformers/recipe_ingredient_transformer'
 import type RecipeTransformer from '#transformers/recipe_transformer'
+import type ShoppingListTransformer from '#transformers/shopping_list_transformer'
 import type StockItemTransformer from '#transformers/stock_item_transformer'
 import type StockMovementTransformer from '#transformers/stock_movement_transformer'
 import type StorageLocationTransformer from '#transformers/storage_location_transformer'
@@ -60,6 +61,10 @@ export namespace Data {
   export type Recipe = InferData<RecipeTransformer>
   export namespace Recipe {
     export type Variants = InferVariants<RecipeTransformer>
+  }
+  export type ShoppingList = InferData<ShoppingListTransformer>
+  export namespace ShoppingList {
+    export type Variants = InferVariants<ShoppingListTransformer>
   }
   export type StockItem = InferData<StockItemTransformer>
   export namespace StockItem {
