@@ -149,6 +149,11 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // Nutrition: recipe, meal and daily summaries (spec §2)
+        router.get('recipes/:recipeId/nutrition', [controllers.Nutrition, 'recipe'])
+        router.get('planned-meals/:mealId/nutrition', [controllers.Nutrition, 'meal'])
+        router.get('nutrition/daily', [controllers.Nutrition, 'daily'])
+
         // Shopping list: planning + stock + thresholds (spec 5.13-5.16, §6.5)
         router.get('shopping-list', [controllers.ShoppingLists, 'show'])
         router.get('product-thresholds', [controllers.ProductThresholds, 'index'])

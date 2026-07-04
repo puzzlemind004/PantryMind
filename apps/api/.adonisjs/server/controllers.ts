@@ -11,6 +11,7 @@ export const controllers = {
   MealTypes: () => import('#controllers/meal_types_controller'),
   MealValidations: () => import('#controllers/meal_validations_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
+  Nutrition: () => import('#controllers/nutrition_controller'),
   PlannedMeals: () => import('#controllers/planned_meals_controller'),
   ProductReferences: () => import('#controllers/product_references_controller'),
   ProductThresholds: () => import('#controllers/product_thresholds_controller'),
