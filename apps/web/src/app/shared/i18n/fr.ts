@@ -117,6 +117,11 @@ export const fr = {
     },
     addTitle: 'Ajouter au stock',
     selectProduct: 'Choisir un produit',
+    genericName: 'Nom générique (pour les recettes)',
+    edit: 'Modifier',
+    editTitle: 'Modifier le lot',
+    consumePartial: 'Quantité consommée',
+    actions: 'Actions',
     createProduct: 'Créer le produit « {name} »',
     productName: 'Nom du produit',
     history: 'Historique',
@@ -171,6 +176,7 @@ export const fr = {
     duplicateNextWeek: 'Dupliquer semaine suivante',
     conflict: 'Ce repas a été modifié entre-temps — la vue a été rechargée.',
     noRecipes: 'Sans recette',
+    noMealTypes: 'Aucun type de repas configuré — vérifiez les paramètres du foyer.',
   },
 
   validation: {

@@ -7,6 +7,7 @@ import type {
   HouseholdInvitation,
   HouseholdMembership,
   HouseholdRole,
+  MealType,
   StorageLocation,
   StorageLocationType,
 } from '../api/types';
@@ -47,5 +48,15 @@ export class HouseholdApi {
     return firstValueFrom(
       this.api.delete(`/households/${householdId}/storage-locations/${locationId}`),
     );
+  }
+
+  listStorageLocations(householdId: string): Promise<StorageLocation[]> {
+    return firstValueFrom(
+      this.api.get<StorageLocation[]>(`/households/${householdId}/storage-locations`),
+    );
+  }
+
+  listMealTypes(householdId: string): Promise<MealType[]> {
+    return firstValueFrom(this.api.get<MealType[]>(`/households/${householdId}/meal-types`));
   }
 }

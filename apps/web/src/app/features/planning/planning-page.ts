@@ -134,40 +134,60 @@ function mondayOf(date: Date): Date {
         </section>
       }
 
-      <!-- Feuille d'ajout de repas -->
+      <!-- Ajout de repas : modal plein écran mobile (retour utilisateur :
+           le formulaire en bas de page obligeait à scroller) -->
       @if (addingDate(); as date) {
-        <div class="card flex flex-col gap-3 border-primary">
-          <h2 class="font-semibold">{{ 'planning.addMeal' | t }} — {{ date }}</h2>
-          <label class="flex flex-col gap-1">
-            <span class="text-sm font-medium">{{ 'planning.mealType' | t }}</span>
-            <select class="input" name="mealType" [(ngModel)]="newMealTypeId">
-              @for (type of mealTypes(); track type.id) {
-                <option [value]="type.id">{{ type.name }} ({{ type.defaultTime }})</option>
+        <div
+          class="fixed inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
+          (click)="addingDate.set(null)"
+        >
+          <div
+            class="card flex w-full max-w-lg flex-col gap-3 rounded-b-none border-primary sm:rounded-b-[var(--radius-card)]"
+            (click)="$event.stopPropagation()"
+          >
+            <h2 class="font-semibold">{{ 'planning.addMeal' | t }} — {{ date }}</h2>
+
+            @if (mealTypes().length === 0) {
+              <p class="error-text">{{ 'planning.noMealTypes' | t }}</p>
+            } @else {
+              <label class="flex flex-col gap-1">
+                <span class="text-sm font-medium">{{ 'planning.mealType' | t }}</span>
+                <select class="input" name="mealType" [(ngModel)]="newMealTypeId">
+                  @for (type of mealTypes(); track type.id) {
+                    <option [value]="type.id">{{ type.name }} ({{ type.defaultTime }})</option>
+                  }
+                </select>
+              </label>
+              <label class="flex flex-col gap-1">
+                <span class="text-sm font-medium">{{ 'planning.addRecipe' | t }}</span>
+                <select class="input" name="recipe" [(ngModel)]="newRecipeId">
+                  <option value="">{{ 'planning.noRecipes' | t }}</option>
+                  @for (recipe of recipes(); track recipe.id) {
+                    <option [value]="recipe.id">{{ recipe.name }}</option>
+                  }
+                </select>
+              </label>
+              @if (newRecipeId) {
+                <label class="flex flex-col gap-1">
+                  <span class="text-sm font-medium">{{ 'planning.servingsLabel' | t }}</span>
+                  <input class="input" type="number" name="servings" min="0.5" step="0.5" [(ngModel)]="newServings" />
+                </label>
               }
-            </select>
-          </label>
-          <label class="flex flex-col gap-1">
-            <span class="text-sm font-medium">{{ 'planning.addRecipe' | t }}</span>
-            <select class="input" name="recipe" [(ngModel)]="newRecipeId">
-              <option value="">{{ 'planning.noRecipes' | t }}</option>
-              @for (recipe of recipes(); track recipe.id) {
-                <option [value]="recipe.id">{{ recipe.name }}</option>
-              }
-            </select>
-          </label>
-          @if (newRecipeId) {
-            <label class="flex flex-col gap-1">
-              <span class="text-sm font-medium">{{ 'planning.servingsLabel' | t }}</span>
-              <input class="input" type="number" name="servings" min="0.5" step="0.5" [(ngModel)]="newServings" />
-            </label>
-          }
-          <div class="flex gap-2">
-            <button type="button" class="btn-primary flex-1" (click)="createMeal()">
-              {{ 'app.save' | t }}
-            </button>
-            <button type="button" class="btn-secondary" (click)="addingDate.set(null)">
-              {{ 'app.cancel' | t }}
-            </button>
+            }
+
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="btn-primary flex-1"
+                [disabled]="!newMealTypeId || saving()"
+                (click)="createMeal()"
+              >
+                {{ 'app.save' | t }}
+              </button>
+              <button type="button" class="btn-secondary" (click)="addingDate.set(null)">
+                {{ 'app.cancel' | t }}
+              </button>
+            </div>
           </div>
         </div>
       }
@@ -185,6 +205,7 @@ export class PlanningPage implements OnInit {
   protected readonly mealTypes = signal<MealType[]>([]);
   protected readonly recipes = signal<Recipe[]>([]);
   protected readonly conflict = signal(false);
+  protected readonly saving = signal(false);
 
   protected readonly addingDate = signal<string | null>(null);
   protected newMealTypeId = '';
@@ -221,11 +242,12 @@ export class PlanningPage implements OnInit {
     if (!this.householdId) {
       return;
     }
-    const [detail, recipes] = await Promise.all([
-      this.householdApi.getDetail(this.householdId),
+    /** Endpoint dédié : indépendant de la profondeur de sérialisation du détail foyer. */
+    const [mealTypes, recipes] = await Promise.all([
+      this.householdApi.listMealTypes(this.householdId),
       this.recipesApi.list(this.householdId),
     ]);
-    this.mealTypes.set(detail.household.mealTypes ?? []);
+    this.mealTypes.set(mealTypes);
     this.recipes.set(recipes);
     this.newMealTypeId = this.mealTypes()[0]?.id ?? '';
     await this.refresh();
@@ -252,15 +274,20 @@ export class PlanningPage implements OnInit {
     if (!householdId || !date || !this.newMealTypeId) {
       return;
     }
-    await this.planningApi.create(householdId, {
-      date,
-      mealTypeId: this.newMealTypeId,
-      recipes: this.newRecipeId
-        ? [{ recipeId: this.newRecipeId, servings: this.newServings }]
-        : [],
-    });
-    this.addingDate.set(null);
-    await this.refresh();
+    this.saving.set(true);
+    try {
+      await this.planningApi.create(householdId, {
+        date,
+        mealTypeId: this.newMealTypeId,
+        recipes: this.newRecipeId
+          ? [{ recipeId: this.newRecipeId, servings: this.newServings }]
+          : [],
+      });
+      this.addingDate.set(null);
+      await this.refresh();
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   protected async deleteMeal(meal: PlannedMeal): Promise<void> {

@@ -94,11 +94,25 @@ const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
       } @else {
         <!-- Étape 2 : quantité, unité, emplacement, DLC -->
         <section class="card flex flex-col gap-1 !py-3">
-          <p class="font-semibold">{{ selectedProduct()!.name }}</p>
-          @if (selectedReference()?.brand || externalData()?.brand) {
+          @if (externalData()) {
+            <!-- Produit issu d'Open Food Facts : le nom générique alimente le
+                 catalogue des recettes, autant le nettoyer tout de suite
+                 (« Penne Rigate Panzani » → « Pâtes »). -->
+            <label class="flex flex-col gap-1">
+              <span class="text-sm font-medium">{{ 'stock.genericName' | t }}</span>
+              <input class="input" type="text" name="genericName" [(ngModel)]="genericName" />
+            </label>
             <p class="text-sm text-muted">
-              {{ selectedReference()?.brand || externalData()?.brand }}
+              {{ externalData()!.name }}
+              @if (externalData()!.brand) {
+                · {{ externalData()!.brand }}
+              }
             </p>
+          } @else {
+            <p class="font-semibold">{{ selectedProduct()!.name }}</p>
+            @if (selectedReference()?.brand) {
+              <p class="text-sm text-muted">{{ selectedReference()?.brand }}</p>
+            }
           }
           <button type="button" class="mt-1 self-start text-sm text-primary" (click)="reset()">
             {{ 'app.back' | t }}
@@ -168,8 +182,7 @@ export class AddStockPage implements OnInit {
   async ngOnInit(): Promise<void> {
     const householdId = this.householdId;
     if (householdId) {
-      const detail = await this.householdApi.getDetail(householdId);
-      this.locations.set(detail.household.storageLocations ?? []);
+      this.locations.set(await this.householdApi.listStorageLocations(householdId));
       this.storageLocationId ||= this.locations()[0]?.id ?? '';
     }
   }
@@ -189,6 +202,8 @@ export class AddStockPage implements OnInit {
   protected unit: Unit = 'g';
   protected storageLocationId = '';
   protected expiresAt = '';
+  /** Nom du produit générique, éditable pour les produits importés d'OFF. */
+  protected genericName = '';
   protected readonly pending = signal(false);
   protected readonly error = signal(false);
 
@@ -242,6 +257,7 @@ export class AddStockPage implements OnInit {
       } else {
         /** Produit connu d'OFF : produit + référence créés à la validation. */
         this.externalData.set(lookup.external);
+        this.genericName = lookup.external.name;
         this.selectedProduct.set({
           id: '',
           name: lookup.external.name,
@@ -279,7 +295,7 @@ export class AddStockPage implements OnInit {
       const external = this.externalData();
       if (!productId && external) {
         const created = await this.stockApi.createReference(householdId, {
-          newProduct: { name: external.name, defaultUnit: this.unit },
+          newProduct: { name: this.genericName.trim() || external.name, defaultUnit: this.unit },
           barcode: external.barcode,
           name: external.name,
           brand: external.brand,

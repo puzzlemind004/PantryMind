@@ -2,16 +2,20 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { HouseholdApi } from '../../core/household/household-api';
 import { HouseholdStore } from '../../core/household/household-store';
 import { TranslatePipe, TranslateService } from '../../shared/i18n/translate';
 import { StockApi } from './stock-api';
-import type { StockItem } from '../../core/api/types';
+import type { StockItem, StorageLocation } from '../../core/api/types';
 
 type Filter = 'all' | 'expiringSoon';
 
 /**
  * Vue principale du stock (spec §8.3) : liste temps réel triée par
  * urgence de péremption, recherche, alertes, consommation en 1 action.
+ * Tap sur un lot → fiche d'édition (quantité, emplacement, DLC) et
+ * actions libellées (retour utilisateur 2026-07-04 : icônes ambiguës,
+ * pas d'édition possible).
  */
 @Component({
   selector: 'app-stock-page',
@@ -63,7 +67,19 @@ type Filter = 'all' | 'expiringSoon';
           <ul class="flex flex-col gap-2">
             @for (item of list; track item.id) {
               <li class="card flex items-center gap-3 !p-3">
-                <div class="min-w-0 flex-1">
+                @if (item.productReference?.imageUrl) {
+                  <img
+                    [src]="item.productReference!.imageUrl"
+                    [alt]="item.product?.name ?? ''"
+                    class="h-12 w-12 shrink-0 rounded-lg bg-surface object-contain"
+                    loading="lazy"
+                  />
+                }
+                <button
+                  type="button"
+                  class="min-w-0 flex-1 text-left"
+                  (click)="openItem(item)"
+                >
                   <p class="truncate font-medium">
                     {{ item.product?.name }}
                     @if (item.productReference?.brand) {
@@ -89,33 +105,20 @@ type Filter = 'all' | 'expiringSoon';
                       </span>
                     }
                   </p>
-                </div>
+                </button>
 
                 @if (householdStore.canEdit()) {
-                  <div class="flex shrink-0 gap-1">
-                    <button
-                      type="button"
-                      class="rounded-full p-2 text-primary transition-colors hover:bg-primary-soft"
-                      [attr.aria-label]="'stock.consumeAll' | t"
-                      [title]="'stock.consumeAll' | t"
-                      (click)="consume(item)"
-                    >
-                      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M4 12l5 5L20 6" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="rounded-full p-2 text-danger transition-colors hover:bg-surface"
-                      [attr.aria-label]="'stock.discard' | t"
-                      [title]="'stock.discard' | t"
-                      (click)="discard(item)"
-                    >
-                      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v5 M14 11v5" />
-                      </svg>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    class="shrink-0 rounded-full p-2 text-primary transition-colors hover:bg-primary-soft"
+                    [attr.aria-label]="'stock.consumeAll' | t"
+                    [title]="'stock.consumeAll' | t"
+                    (click)="consumeAll(item)"
+                  >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M4 12l5 5L20 6" />
+                    </svg>
+                  </button>
                 }
               </li>
             }
@@ -124,23 +127,149 @@ type Filter = 'all' | 'expiringSoon';
       } @else {
         <p class="py-12 text-center text-muted">{{ 'app.loading' | t }}</p>
       }
+
+      <!-- Fiche lot : édition + actions libellées -->
+      @if (selected(); as item) {
+        <div
+          class="fixed inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
+          (click)="selected.set(null)"
+        >
+          <div
+            class="card flex max-h-[90dvh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-b-none sm:rounded-b-[var(--radius-card)]"
+            (click)="$event.stopPropagation()"
+          >
+            <header class="flex items-center gap-3">
+              @if (item.productReference?.imageUrl) {
+                <img
+                  [src]="item.productReference!.imageUrl"
+                  [alt]="item.product?.name ?? ''"
+                  class="h-16 w-16 shrink-0 rounded-lg bg-surface object-contain"
+                />
+              }
+              <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold">{{ item.product?.name }}</h2>
+                @if (item.productReference) {
+                  <p class="truncate text-sm text-muted">
+                    {{ item.productReference.brand }} {{ item.productReference.name }}
+                  </p>
+                }
+              </div>
+            </header>
+
+            @if (householdStore.canEdit()) {
+              <!-- Édition (spec 5.18 : correction manuelle à tout moment) -->
+              <section class="flex flex-col gap-3">
+                <h3 class="text-sm font-semibold text-muted">{{ 'stock.editTitle' | t }}</h3>
+                <div class="flex gap-3">
+                  <label class="flex flex-1 flex-col gap-1">
+                    <span class="text-sm font-medium">{{ 'stock.quantity' | t }}</span>
+                    <input
+                      class="input"
+                      type="number"
+                      name="editQuantity"
+                      min="0"
+                      step="any"
+                      [(ngModel)]="editQuantity"
+                    />
+                  </label>
+                  <label class="flex flex-1 flex-col gap-1">
+                    <span class="text-sm font-medium">{{ 'stock.expiryDate' | t }}</span>
+                    <input class="input" type="date" name="editExpiresAt" [(ngModel)]="editExpiresAt" />
+                  </label>
+                </div>
+                <label class="flex flex-col gap-1">
+                  <span class="text-sm font-medium">{{ 'stock.location' | t }}</span>
+                  <select class="input" name="editLocation" [(ngModel)]="editLocationId">
+                    <option value="">—</option>
+                    @for (location of locations(); track location.id) {
+                      <option [value]="location.id">{{ location.name }}</option>
+                    }
+                  </select>
+                </label>
+                <button type="button" class="btn-primary" [disabled]="pending()" (click)="saveEdit(item)">
+                  {{ 'app.save' | t }}
+                </button>
+              </section>
+
+              <!-- Actions libellées (fini les icônes ambiguës) -->
+              <section class="flex flex-col gap-2">
+                <h3 class="text-sm font-semibold text-muted">{{ 'stock.actions' | t }}</h3>
+                <div class="flex items-center gap-2">
+                  <input
+                    class="input !w-24 !px-2 text-right"
+                    type="number"
+                    name="consumeQuantity"
+                    min="0.001"
+                    step="any"
+                    [(ngModel)]="consumeQuantity"
+                  />
+                  <span class="text-sm text-muted">{{ 'units.' + item.unit | t }}</span>
+                  <button
+                    type="button"
+                    class="btn-secondary flex-1 text-primary"
+                    [disabled]="pending()"
+                    (click)="consumePartial(item)"
+                  >
+                    {{ 'stock.consume' | t }}
+                  </button>
+                </div>
+                <button type="button" class="btn-secondary text-primary" [disabled]="pending()" (click)="consumeAll(item)">
+                  ✓ {{ 'stock.consumeAll' | t }}
+                </button>
+                <div class="flex gap-2">
+                  @for (reason of discardReasons; track reason) {
+                    <button
+                      type="button"
+                      class="btn-secondary flex-1 text-danger"
+                      [disabled]="pending()"
+                      (click)="discard(item, reason)"
+                    >
+                      {{ 'stock.discardReasons.' + reason | t }}
+                    </button>
+                  }
+                </div>
+              </section>
+            }
+
+            <button type="button" class="btn-secondary" (click)="selected.set(null)">
+              {{ 'app.cancel' | t }}
+            </button>
+          </div>
+        </div>
+      }
     </div>
   `,
 })
 export class StockPage implements OnInit {
   protected readonly householdStore = inject(HouseholdStore);
+  private readonly householdApi = inject(HouseholdApi);
   private readonly stockApi = inject(StockApi);
   private readonly translateService = inject(TranslateService);
 
   protected readonly items = signal<StockItem[] | null>(null);
   protected readonly search = signal('');
   protected readonly filter = signal<Filter>('all');
+  protected readonly locations = signal<StorageLocation[]>([]);
+  protected readonly pending = signal(false);
+
+  /** Lot ouvert dans la fiche d'édition. */
+  protected readonly selected = signal<StockItem | null>(null);
+  protected editQuantity = 0;
+  protected editExpiresAt = '';
+  protected editLocationId = '';
+  protected consumeQuantity = 1;
+
+  protected readonly discardReasons = ['trashed', 'lost', 'given'] as const;
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly householdId = computed(() => this.householdStore.currentHousehold()?.id);
 
   async ngOnInit(): Promise<void> {
+    const householdId = this.householdId();
+    if (householdId) {
+      this.locations.set(await this.householdApi.listStorageLocations(householdId));
+    }
     await this.refresh();
   }
 
@@ -157,22 +286,48 @@ export class StockPage implements OnInit {
     void this.refresh();
   }
 
-  protected async consume(item: StockItem): Promise<void> {
-    const householdId = this.householdId();
-    if (!householdId) {
-      return;
-    }
-    await this.stockApi.consume(householdId, item.id);
-    await this.refresh();
+  protected openItem(item: StockItem): void {
+    this.selected.set(item);
+    this.editQuantity = item.quantity;
+    this.editExpiresAt = item.expiresAt ?? '';
+    this.editLocationId = item.storageLocationId ?? '';
+    this.consumeQuantity = Math.min(item.quantity, 1) || 1;
   }
 
-  protected async discard(item: StockItem): Promise<void> {
+  protected async saveEdit(item: StockItem): Promise<void> {
     const householdId = this.householdId();
     if (!householdId) {
       return;
     }
-    await this.stockApi.discard(householdId, item.id);
-    await this.refresh();
+    this.pending.set(true);
+    try {
+      await this.stockApi.updateItem(householdId, item.id, {
+        quantity: this.editQuantity,
+        storageLocationId: this.editLocationId || null,
+        expiresAt: this.editExpiresAt || null,
+      });
+      this.selected.set(null);
+      await this.refresh();
+    } finally {
+      this.pending.set(false);
+    }
+  }
+
+  protected async consumeAll(item: StockItem): Promise<void> {
+    await this.runAction(() => this.stockApi.consume(this.householdId()!, item.id));
+  }
+
+  protected async consumePartial(item: StockItem): Promise<void> {
+    if (this.consumeQuantity <= 0) {
+      return;
+    }
+    await this.runAction(() =>
+      this.stockApi.consume(this.householdId()!, item.id, this.consumeQuantity),
+    );
+  }
+
+  protected async discard(item: StockItem, reason: 'trashed' | 'lost' | 'given'): Promise<void> {
+    await this.runAction(() => this.stockApi.discard(this.householdId()!, item.id, reason));
   }
 
   /** Badge de péremption : périmé / aujourd'hui / dans N jours (≤ 7 j). */
@@ -181,23 +336,33 @@ export class StockPage implements OnInit {
       return null;
     }
     if (item.isExpired) {
-      return this.translateKey('stock.expired');
+      return this.translateService.translate('stock.expired');
     }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const expiry = new Date(item.expiresAt);
     const days = Math.round((expiry.getTime() - today.getTime()) / 86_400_000);
     if (days === 0) {
-      return this.translateKey('stock.expiresToday');
+      return this.translateService.translate('stock.expiresToday');
     }
     if (days <= 7) {
-      return this.translateKey('stock.expiresInDays', { days });
+      return this.translateService.translate('stock.expiresInDays', { days });
     }
     return null;
   }
 
-  private translateKey(key: string, params?: Record<string, string | number>): string {
-    return this.translateService.translate(key, params);
+  private async runAction(action: () => Promise<unknown>): Promise<void> {
+    if (!this.householdId()) {
+      return;
+    }
+    this.pending.set(true);
+    try {
+      await action();
+      this.selected.set(null);
+      await this.refresh();
+    } finally {
+      this.pending.set(false);
+    }
   }
 
   private async refresh(): Promise<void> {

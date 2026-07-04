@@ -41,6 +41,16 @@ export class StockApi {
     return firstValueFrom(this.api.post<StockItem>(`/households/${householdId}/stock-items`, payload));
   }
 
+  updateItem(
+    householdId: string,
+    itemId: string,
+    payload: { quantity?: number; storageLocationId?: string | null; expiresAt?: string | null },
+  ): Promise<StockItem> {
+    return firstValueFrom(
+      this.api.patch<StockItem>(`/households/${householdId}/stock-items/${itemId}`, payload),
+    );
+  }
+
   consume(householdId: string, itemId: string, quantity?: number): Promise<StockItem> {
     return firstValueFrom(
       this.api.post<StockItem>(
