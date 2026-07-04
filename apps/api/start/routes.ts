@@ -123,6 +123,28 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // Meal planning: never touches the stock while "planned" (spec 5.1, §6.4)
+        router.get('planned-meals', [controllers.PlannedMeals, 'index'])
+        router.get('planned-meals/:mealId', [controllers.PlannedMeals, 'show'])
+        router
+          .group(() => {
+            router.post('planned-meals', [controllers.PlannedMeals, 'store'])
+            router.patch('planned-meals/:mealId', [controllers.PlannedMeals, 'update'])
+            router.delete('planned-meals/:mealId', [controllers.PlannedMeals, 'destroy'])
+            router.post('planned-meals/:mealId/cancel', [controllers.PlannedMeals, 'cancel'])
+            router.post('planned-meals/:mealId/duplicate', [controllers.PlannedMeals, 'duplicate'])
+            router.post('planned-meals/:mealId/recipes', [controllers.PlannedMeals, 'addRecipe'])
+            router.patch('planned-meals/:mealId/recipes/:mealRecipeId', [
+              controllers.PlannedMeals,
+              'updateRecipe',
+            ])
+            router.delete('planned-meals/:mealId/recipes/:mealRecipeId', [
+              controllers.PlannedMeals,
+              'removeRecipe',
+            ])
+          })
+          .use(middleware.household({ role: 'member' }))
+
         // Stock: physical lots, FIFO, full traceability (spec §4.5, §6.1)
         router.get('stock-items', [controllers.StockItems, 'index'])
         router.get('stock-items/:itemId/movements', [controllers.StockItems, 'movements'])

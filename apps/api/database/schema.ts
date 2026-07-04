@@ -140,6 +140,52 @@ export class MealTypeSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class PlannedMealRecipeSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'plannedMealId', 'recipeId', 'servings', 'snapshot', 'updatedAt'] as const
+  $columns = PlannedMealRecipeSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare plannedMealId: string
+  @column()
+  declare recipeId: string | null
+  @column()
+  declare servings: number
+  @column()
+  declare snapshot: any
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PlannedMealSchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'householdId', 'id', 'mealName', 'mealTypeId', 'notes', 'status', 'timeOverride', 'updatedAt', 'version'] as const
+  $columns = PlannedMealSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mealName: string
+  @column()
+  declare mealTypeId: string | null
+  @column()
+  declare notes: string | null
+  @column()
+  declare status: string
+  @column()
+  declare timeOverride: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare version: number
+}
+
 export class ProductReferenceSchema extends BaseModel {
   static $columns = ['barcode', 'brand', 'createdAt', 'id', 'imageUrl', 'name', 'nutritionPer100', 'packageQuantity', 'packageUnit', 'productId', 'shelfLifeDays', 'source', 'updatedAt'] as const
   $columns = ProductReferenceSchema.$columns

@@ -10,6 +10,7 @@ import type HouseholdMemberTransformer from '#transformers/household_member_tran
 import type HouseholdMembershipTransformer from '#transformers/household_membership_transformer'
 import type HouseholdTransformer from '#transformers/household_transformer'
 import type MealTypeTransformer from '#transformers/meal_type_transformer'
+import type PlannedMealTransformer from '#transformers/planned_meal_transformer'
 import type ProductReferenceTransformer from '#transformers/product_reference_transformer'
 import type ProductTransformer from '#transformers/product_transformer'
 import type RecipeIngredientTransformer from '#transformers/recipe_ingredient_transformer'
@@ -39,6 +40,10 @@ export namespace Data {
   export type MealType = InferData<MealTypeTransformer>
   export namespace MealType {
     export type Variants = InferVariants<MealTypeTransformer>
+  }
+  export type PlannedMeal = InferData<PlannedMealTransformer>
+  export namespace PlannedMeal {
+    export type Variants = InferVariants<PlannedMealTransformer>
   }
   export type ProductReference = InferData<ProductReferenceTransformer>
   export namespace ProductReference {
