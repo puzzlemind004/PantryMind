@@ -37,7 +37,7 @@ Vérification :
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
-curl -s https://SITE_ADDRESS/api/v1 -o /dev/null -w '%{http_code}\n'
+curl -s https://pantry.puzzlemind.fr/api/v1 -o /dev/null -w '%{http_code}\n'
 ```
 
 ## 2 bis. Cohabitation avec un serveur web natif existant
@@ -111,3 +111,14 @@ docker compose -f docker-compose.prod.yml logs -f api
 docker compose -f docker-compose.prod.yml logs -f web
 docker exec -it cooking-prod-postgres-1 psql -U cooking cooking
 ```
+
+## 6. Production actuelle
+
+| Élément | Valeur |
+| --- | --- |
+| URL | https://pantry.puzzlemind.fr (ancien nom srv571823.hstgr.cloud → 301) |
+| Serveur | VPS Hostinger `srv571823` (92.112.192.247), Ubuntu 24.04 |
+| Mode | Cohabitation §2 bis : stack Docker sur `127.0.0.1:8080` derrière le nginx natif (qui héberge aussi d'autres sites), TLS par certbot |
+| Emplacement | `/opt/cooking`, configuration dans `.env.production` (variables `COOKING_*`) |
+| DNS | Enregistrement A `pantry` de la zone puzzlemind.fr (gérée chez Hostinger) |
+| Sauvegardes | `pg_dump` quotidien 03:00 via crontab root |
