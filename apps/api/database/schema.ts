@@ -217,6 +217,25 @@ export class ProductReferenceSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProductThresholdSchema extends BaseModel {
+  static $columns = ['createdAt', 'householdId', 'id', 'minQuantity', 'productId', 'unit', 'updatedAt'] as const
+  $columns = ProductThresholdSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare minQuantity: number
+  @column()
+  declare productId: string
+  @column()
+  declare unit: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ProductSchema extends BaseModel {
   static $columns = ['allergens', 'category', 'ciqualCode', 'createdAt', 'defaultUnit', 'densityGPerMl', 'householdId', 'id', 'name', 'nutritionPer100', 'unitWeightGrams', 'updatedAt'] as const
   $columns = ProductSchema.$columns
@@ -300,6 +319,58 @@ export class RecipeSchema extends BaseModel {
   declare tags: any
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class ShoppingListItemSchema extends BaseModel {
+  static $columns = ['checkedAt', 'checkedBy', 'createdAt', 'id', 'neededQuantity', 'packageCount', 'productId', 'productName', 'productReferenceId', 'shoppingListId', 'source', 'stockItemId', 'unit', 'updatedAt'] as const
+  $columns = ShoppingListItemSchema.$columns
+  @column.dateTime()
+  declare checkedAt: DateTime | null
+  @column()
+  declare checkedBy: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare neededQuantity: number
+  @column()
+  declare packageCount: number | null
+  @column()
+  declare productId: string
+  @column()
+  declare productName: string
+  @column()
+  declare productReferenceId: string | null
+  @column()
+  declare shoppingListId: string
+  @column()
+  declare source: string
+  @column()
+  declare stockItemId: string | null
+  @column()
+  declare unit: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ShoppingListSchema extends BaseModel {
+  static $columns = ['createdAt', 'generatedAt', 'householdId', 'id', 'status', 'updatedAt', 'version'] as const
+  $columns = ShoppingListSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare generatedAt: DateTime | null
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare version: number
 }
 
 export class StockItemSchema extends BaseModel {
