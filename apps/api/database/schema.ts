@@ -108,6 +108,19 @@ export class HouseholdSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class IngredientSubstituteSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'productId', 'recipeIngredientId'] as const
+  $columns = IngredientSubstituteSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare productId: string
+  @column()
+  declare recipeIngredientId: string
+}
+
 export class MealTypeSchema extends BaseModel {
   static $columns = ['createdAt', 'defaultTime', 'householdId', 'id', 'name', 'position', 'updatedAt'] as const
   $columns = MealTypeSchema.$columns
@@ -183,6 +196,62 @@ export class ProductSchema extends BaseModel {
   declare nutritionPer100: any | null
   @column()
   declare unitWeightGrams: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class RecipeIngredientSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'note', 'optional', 'position', 'productId', 'quantity', 'recipeId', 'unit', 'updatedAt'] as const
+  $columns = RecipeIngredientSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare note: string | null
+  @column()
+  declare optional: boolean
+  @column()
+  declare position: number
+  @column()
+  declare productId: string
+  @column()
+  declare quantity: number
+  @column()
+  declare recipeId: string
+  @column()
+  declare unit: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class RecipeSchema extends BaseModel {
+  static $columns = ['cookMinutes', 'createdAt', 'deletedAt', 'description', 'householdId', 'id', 'imageUrl', 'name', 'prepMinutes', 'servings', 'steps', 'tags', 'updatedAt'] as const
+  $columns = RecipeSchema.$columns
+  @column()
+  declare cookMinutes: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare imageUrl: string | null
+  @column()
+  declare name: string
+  @column()
+  declare prepMinutes: number | null
+  @column()
+  declare servings: number
+  @column()
+  declare steps: any
+  @column()
+  declare tags: any
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
