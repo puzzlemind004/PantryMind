@@ -36,13 +36,13 @@ export const routes: Routes = [
       },
       {
         path: 'planning',
-        loadComponent: () => import('./shared/ui/coming-soon').then((m) => m.ComingSoon),
-        data: { titleKey: 'planning.title', messageKey: 'planning.comingSoon' },
+        loadChildren: () =>
+          import('./features/planning/planning.routes').then((m) => m.planningRoutes),
       },
       {
         path: 'recipes',
-        loadComponent: () => import('./shared/ui/coming-soon').then((m) => m.ComingSoon),
-        data: { titleKey: 'recipes.title', messageKey: 'recipes.comingSoon' },
+        loadChildren: () =>
+          import('./features/recipes/recipes.routes').then((m) => m.recipesRoutes),
       },
       {
         path: 'shopping',
