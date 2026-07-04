@@ -126,6 +126,10 @@ router
         // Meal planning: never touches the stock while "planned" (spec 5.1, §6.4)
         router.get('planned-meals', [controllers.PlannedMeals, 'index'])
         router.get('planned-meals/:mealId', [controllers.PlannedMeals, 'show'])
+        router.get('planned-meals/:mealId/preview', [controllers.MealValidations, 'preview'])
+        router
+          .post('planned-meals/:mealId/complete', [controllers.MealValidations, 'complete'])
+          .use(middleware.household({ role: 'member' }))
         router
           .group(() => {
             router.post('planned-meals', [controllers.PlannedMeals, 'store'])

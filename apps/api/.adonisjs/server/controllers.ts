@@ -9,6 +9,7 @@ export const controllers = {
   HouseholdMembers: () => import('#controllers/household_members_controller'),
   Households: () => import('#controllers/households_controller'),
   MealTypes: () => import('#controllers/meal_types_controller'),
+  MealValidations: () => import('#controllers/meal_validations_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   PlannedMeals: () => import('#controllers/planned_meals_controller'),
   ProductReferences: () => import('#controllers/product_references_controller'),
