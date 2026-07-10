@@ -152,6 +152,15 @@ router
         // Recommendations: transparent suggestions (spec §6.7, 9.5)
         router.get('recommendations', [controllers.Recommendations, 'index'])
 
+        // Push notifications (spec §6.6)
+        router.get('push/public-key', [controllers.PushSubscriptions, 'publicKey'])
+        router
+          .group(() => {
+            router.post('push/subscriptions', [controllers.PushSubscriptions, 'subscribe'])
+            router.post('push/unsubscribe', [controllers.PushSubscriptions, 'unsubscribe'])
+          })
+          .use(middleware.household({ role: 'member' }))
+
         // Nutrition: recipe, meal and daily summaries (spec §2)
         router.get('recipes/:recipeId/nutrition', [controllers.Nutrition, 'recipe'])
         router.get('planned-meals/:mealId/nutrition', [controllers.Nutrition, 'meal'])

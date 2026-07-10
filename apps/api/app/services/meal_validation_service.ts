@@ -110,7 +110,7 @@ export default class MealValidationService {
   static async complete(
     meal: PlannedMeal,
     household: Household,
-    user: User,
+    user: User | null,
     payload: { version: number; items?: ConsumptionItem[] }
   ) {
     PlanningService.assertVersion(meal, payload.version)
@@ -155,7 +155,7 @@ export default class MealValidationService {
 
     await ActivityLogService.record({
       householdId: household.id,
-      userId: user.id,
+      userId: user?.id ?? null,
       action: 'planned_meal.completed',
       subjectType: 'planned_meal',
       subjectId: meal.id,

@@ -138,7 +138,7 @@ export default class StockService {
    */
   static async consumeProductFifo(
     household: Household,
-    user: User,
+    user: User | null,
     payload: {
       productId: string
       quantity: number

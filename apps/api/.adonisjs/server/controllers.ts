@@ -17,6 +17,7 @@ export const controllers = {
   ProductThresholds: () => import('#controllers/product_thresholds_controller'),
   Products: () => import('#controllers/products_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  PushSubscriptions: () => import('#controllers/push_subscriptions_controller'),
   Recipes: () => import('#controllers/recipes_controller'),
   Recommendations: () => import('#controllers/recommendations_controller'),
   ShoppingLists: () => import('#controllers/shopping_lists_controller'),

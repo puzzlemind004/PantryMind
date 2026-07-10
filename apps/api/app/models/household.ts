@@ -10,8 +10,10 @@ import StorageLocation from '#models/storage_location'
 import User from '#models/user'
 
 export interface HouseholdSettings {
-  /** Automatic consumption validation (spec 5.20) — Lot 4. */
+  /** Automatic consumption validation (spec 5.20). */
   automaticMode?: boolean
+  /** Marker: expiry digest already sent that day (scheduler idempotence). */
+  lastExpiryAlertDate?: string
 }
 
 export default class Household extends withUuidPrimaryKey(HouseholdSchema) {

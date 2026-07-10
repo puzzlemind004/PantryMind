@@ -160,7 +160,7 @@ export class PlannedMealRecipeSchema extends BaseModel {
 }
 
 export class PlannedMealSchema extends BaseModel {
-  static $columns = ['createdAt', 'date', 'householdId', 'id', 'mealName', 'mealTypeId', 'notes', 'status', 'timeOverride', 'updatedAt', 'version'] as const
+  static $columns = ['createdAt', 'date', 'householdId', 'id', 'mealName', 'mealTypeId', 'notes', 'notifiedAt', 'status', 'timeOverride', 'updatedAt', 'version'] as const
   $columns = PlannedMealSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -176,6 +176,8 @@ export class PlannedMealSchema extends BaseModel {
   declare mealTypeId: string | null
   @column()
   declare notes: string | null
+  @column.dateTime()
+  declare notifiedAt: DateTime | null
   @column()
   declare status: string
   @column()
@@ -263,6 +265,25 @@ export class ProductSchema extends BaseModel {
   declare unitWeightGrams: number | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class PushSubscriptionSchema extends BaseModel {
+  static $columns = ['auth', 'createdAt', 'endpoint', 'householdId', 'id', 'p256Dh', 'userId'] as const
+  $columns = PushSubscriptionSchema.$columns
+  @column()
+  declare auth: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endpoint: string
+  @column()
+  declare householdId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare p256Dh: string
+  @column()
+  declare userId: string
 }
 
 export class RecipeIngredientSchema extends BaseModel {

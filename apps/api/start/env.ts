@@ -31,4 +31,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string(),
   DB_PASSWORD: Env.schema.string(),
   DB_DATABASE: Env.schema.string(),
+
+  // Web Push (notifications désactivées si absent)
+  VAPID_PUBLIC_KEY: Env.schema.string.optional(),
+  VAPID_PRIVATE_KEY: Env.schema.string.optional(),
+  VAPID_SUBJECT: Env.schema.string.optional(),
 })
