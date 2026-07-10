@@ -571,6 +571,114 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/planned_meals_controller').default['removeRecipe']>>>
     }
   }
+  'household.recommendations.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/recommendations'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recommendations_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recommendations_controller').default['index']>>>
+    }
+  }
+  'household.push_subscriptions.public_key': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/push/public-key'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['publicKey']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['publicKey']>>>
+    }
+  }
+  'household.push_subscriptions.subscribe': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/push/subscriptions'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['subscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['subscribe']>>>
+    }
+  }
+  'household.push_subscriptions.unsubscribe': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/push/unsubscribe'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['unsubscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/push_subscriptions_controller').default['unsubscribe']>>>
+    }
+  }
+  'household.ciqual.search': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/ciqual'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ciqual_controller').default['search']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ciqual_controller').default['search']>>>
+    }
+  }
+  'household.ciqual.link': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/products/:productId/ciqual'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; productId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ciqual_controller').default['link']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ciqual_controller').default['link']>>>
+    }
+  }
+  'household.nutrition.recipe': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/recipes/:recipeId/nutrition'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; recipeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['recipe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['recipe']>>>
+    }
+  }
+  'household.nutrition.meal': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/planned-meals/:mealId/nutrition'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; mealId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['meal']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['meal']>>>
+    }
+  }
+  'household.nutrition.daily': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/households/:householdId/nutrition/daily'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { householdId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['daily']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/nutrition_controller').default['daily']>>>
+    }
+  }
   'household.shopping_lists.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/households/:householdId/shopping-list'

@@ -51,6 +51,15 @@ export type ScannedRoutes = {
     'household.planned_meals.add_recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.update_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
     'household.planned_meals.remove_recipe': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue,'mealRecipeId': ParamValue} }
+    'household.recommendations.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.public_key': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.subscribe': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.unsubscribe': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.ciqual.search': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.ciqual.link': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'productId': ParamValue} }
+    'household.nutrition.recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'recipeId': ParamValue} }
+    'household.nutrition.meal': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.nutrition.daily': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.generate': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
@@ -84,6 +93,12 @@ export type ScannedRoutes = {
     'household.planned_meals.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.planned_meals.show': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.meal_validations.preview': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.recommendations.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.public_key': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.ciqual.search': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.nutrition.recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'recipeId': ParamValue} }
+    'household.nutrition.meal': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.nutrition.daily': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
@@ -105,6 +120,12 @@ export type ScannedRoutes = {
     'household.planned_meals.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.planned_meals.show': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.meal_validations.preview': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.recommendations.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.public_key': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.ciqual.search': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.nutrition.recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'recipeId': ParamValue} }
+    'household.nutrition.meal': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.nutrition.daily': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.show': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.product_thresholds.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.index': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
@@ -128,6 +149,9 @@ export type ScannedRoutes = {
     'household.planned_meals.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.duplicate': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
     'household.planned_meals.add_recipe': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'mealId': ParamValue} }
+    'household.push_subscriptions.subscribe': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.push_subscriptions.unsubscribe': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
+    'household.ciqual.link': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'productId': ParamValue} }
     'household.shopping_lists.generate': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.add_item': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.shopping_lists.check_item': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }

@@ -88,6 +88,23 @@ export interface ApiDefinition {
       preview: typeof routes['household.meal_validations.preview']
       complete: typeof routes['household.meal_validations.complete']
     }
+    recommendations: {
+      index: typeof routes['household.recommendations.index']
+    }
+    pushSubscriptions: {
+      publicKey: typeof routes['household.push_subscriptions.public_key']
+      subscribe: typeof routes['household.push_subscriptions.subscribe']
+      unsubscribe: typeof routes['household.push_subscriptions.unsubscribe']
+    }
+    ciqual: {
+      search: typeof routes['household.ciqual.search']
+      link: typeof routes['household.ciqual.link']
+    }
+    nutrition: {
+      recipe: typeof routes['household.nutrition.recipe']
+      meal: typeof routes['household.nutrition.meal']
+      daily: typeof routes['household.nutrition.daily']
+    }
     shoppingLists: {
       show: typeof routes['household.shopping_lists.show']
       generate: typeof routes['household.shopping_lists.generate']
