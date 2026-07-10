@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth-store';
 import { HouseholdApi } from '../../core/household/household-api';
 import { HouseholdStore } from '../../core/household/household-store';
+import { PushApi } from '../../core/push/push-api';
 import { TranslatePipe } from '../../shared/i18n/translate';
 import type { HouseholdInvitation, HouseholdMembership } from '../../core/api/types';
 
@@ -132,6 +133,42 @@ import type { HouseholdInvitation, HouseholdMembership } from '../../core/api/ty
         <p class="text-center text-muted">{{ 'app.loading' | t }}</p>
       }
 
+      <!-- Mode automatique (spec 5.20, admin) -->
+      @if (detail()?.role === 'admin') {
+        <section class="card flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h2 class="font-semibold">{{ 'profile.automaticMode' | t }}</h2>
+            <p class="mt-1 text-xs text-muted">{{ 'profile.automaticModeHint' | t }}</p>
+          </div>
+          <input
+            type="checkbox"
+            class="mt-1 h-5 w-5 shrink-0 accent-[var(--color-primary)]"
+            [checked]="automaticMode()"
+            (change)="toggleAutomaticMode($event)"
+            [attr.aria-label]="'profile.automaticMode' | t"
+          />
+        </section>
+      }
+
+      <!-- Notifications push (spec §6.6) -->
+      <section class="card flex flex-col gap-2">
+        <h2 class="font-semibold">{{ 'profile.notifications' | t }}</h2>
+        <p class="text-xs text-muted">{{ 'profile.notificationsHint' | t }}</p>
+        @if (!pushSupported()) {
+          <p class="text-sm text-muted">{{ 'profile.notificationsUnsupported' | t }}</p>
+        } @else if (pushError()) {
+          <p class="error-text">{{ pushError()! | t }}</p>
+        } @else if (pushSubscribed()) {
+          <button class="btn-secondary" type="button" (click)="disablePush()">
+            {{ 'profile.disableNotifications' | t }}
+          </button>
+        } @else {
+          <button class="btn-primary" type="button" (click)="enablePush()">
+            {{ 'profile.enableNotifications' | t }}
+          </button>
+        }
+      </section>
+
       <button class="btn-secondary text-danger" type="button" (click)="logout()">
         {{ 'auth.logout' | t }}
       </button>
@@ -148,11 +185,59 @@ export class ProfilePage implements OnInit {
   protected readonly invitation = signal<HouseholdInvitation | null>(null);
   protected newLocationName = '';
 
+  protected readonly automaticMode = signal(false);
+  protected readonly pushSupported = signal(false);
+  protected readonly pushSubscribed = signal(false);
+  protected readonly pushError = signal<string | null>(null);
+
+  private readonly pushApi = inject(PushApi);
+
   async ngOnInit(): Promise<void> {
     if (!this.authStore.user()) {
       await this.authStore.loadProfile();
     }
     await this.refresh();
+    this.pushSupported.set(this.pushApi.isSupported);
+    if (this.pushApi.isSupported) {
+      this.pushSubscribed.set(await this.pushApi.isSubscribed());
+    }
+  }
+
+  protected async toggleAutomaticMode(event: Event): Promise<void> {
+    const householdId = this.householdStore.currentHousehold()?.id;
+    if (!householdId) {
+      return;
+    }
+    const enabled = (event.target as HTMLInputElement).checked;
+    await this.householdApi.updateSettings(householdId, { automaticMode: enabled });
+    this.automaticMode.set(enabled);
+  }
+
+  protected async enablePush(): Promise<void> {
+    const householdId = this.householdStore.currentHousehold()?.id;
+    if (!householdId) {
+      return;
+    }
+    this.pushError.set(null);
+    try {
+      await this.pushApi.subscribe(householdId);
+      this.pushSubscribed.set(true);
+    } catch {
+      this.pushError.set(
+        Notification.permission === 'denied'
+          ? 'profile.notificationsDenied'
+          : 'profile.notificationsUnsupported',
+      );
+    }
+  }
+
+  protected async disablePush(): Promise<void> {
+    const householdId = this.householdStore.currentHousehold()?.id;
+    if (!householdId) {
+      return;
+    }
+    await this.pushApi.unsubscribe(householdId);
+    this.pushSubscribed.set(false);
   }
 
   protected async switchHousehold(householdId: string): Promise<void> {
@@ -198,7 +283,9 @@ export class ProfilePage implements OnInit {
   private async refresh(): Promise<void> {
     const householdId = this.householdStore.currentHousehold()?.id;
     if (householdId) {
-      this.detail.set(await this.householdApi.getDetail(householdId));
+      const detail = await this.householdApi.getDetail(householdId);
+      this.detail.set(detail);
+      this.automaticMode.set(detail.household.settings?.automaticMode === true);
     }
   }
 }

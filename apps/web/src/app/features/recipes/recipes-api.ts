@@ -2,7 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiClient } from '../../core/api/api-client';
-import type { Recipe, RecipeFeasibility, Unit } from '../../core/api/types';
+import type {
+  Recipe,
+  RecipeFeasibility,
+  RecipeNutrition,
+  Recommendation,
+  Unit,
+} from '../../core/api/types';
 
 export interface RecipeIngredientPayload {
   productId: string;
@@ -60,6 +66,21 @@ export class RecipesApi {
       this.api.get<RecipeFeasibility>(`/households/${householdId}/recipes/${recipeId}/feasibility`, {
         servings,
       }),
+    );
+  }
+
+  nutrition(householdId: string, recipeId: string): Promise<RecipeNutrition> {
+    return firstValueFrom(
+      this.api.get<RecipeNutrition>(`/households/${householdId}/recipes/${recipeId}/nutrition`),
+    );
+  }
+
+  recommendations(householdId: string, limit = 3): Promise<{ recommendations: Recommendation[] }> {
+    return firstValueFrom(
+      this.api.get<{ recommendations: Recommendation[] }>(
+        `/households/${householdId}/recommendations`,
+        { limit },
+      ),
     );
   }
 }

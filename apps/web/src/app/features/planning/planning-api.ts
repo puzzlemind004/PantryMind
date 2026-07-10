@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ApiClient } from '../../core/api/api-client';
 import type {
+  DailyNutrition,
   MealCompletionResult,
   MealNeed,
   PlannedMeal,
@@ -74,6 +75,12 @@ export class PlanningApi {
   removeRecipe(householdId: string, mealId: string, mealRecipeId: string): Promise<void> {
     return firstValueFrom(
       this.api.delete(`/households/${householdId}/planned-meals/${mealId}/recipes/${mealRecipeId}`),
+    );
+  }
+
+  dailyNutrition(householdId: string, date: string): Promise<DailyNutrition> {
+    return firstValueFrom(
+      this.api.get<DailyNutrition>(`/households/${householdId}/nutrition/daily`, { date }),
     );
   }
 

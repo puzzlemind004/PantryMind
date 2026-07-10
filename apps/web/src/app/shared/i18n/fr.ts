@@ -242,6 +242,39 @@ export const fr = {
 
   profile: {
     title: 'Profil',
+    automaticMode: 'Mode automatique',
+    automaticModeHint:
+      'Les repas passés sont validés automatiquement avec les quantités théoriques et le stock est mis à jour sans confirmation.',
+    notifications: 'Notifications push',
+    notificationsHint: 'Rappels de repas à valider et alertes de péremption sur cet appareil.',
+    enableNotifications: 'Activer sur cet appareil',
+    disableNotifications: 'Désactiver',
+    notificationsUnsupported: 'Notifications non disponibles (navigateur ou installation PWA requise).',
+    notificationsDenied: 'Notifications refusées dans les réglages du navigateur.',
+  },
+
+  nutrition: {
+    title: 'Nutrition',
+    perServing: 'Par portion',
+    today: "Nutrition d'aujourd'hui",
+    kcal: 'kcal',
+    proteins: 'Protéines',
+    carbohydrates: 'Glucides',
+    fat: 'Lipides',
+    missingData: 'Sans données : {products}',
+    grams: 'g',
+  },
+
+  suggestions: {
+    title: 'Suggestions',
+    reasons: {
+      all_ingredients_available: 'Tous les ingrédients sont disponibles',
+      most_ingredients_available: '{percent}% des ingrédients disponibles',
+      uses_expiring_product: '{productName} périme dans {days} j',
+      not_cooked_recently: 'Pas cuisiné récemment',
+      cooked_recently: 'Déjà cuisiné cette semaine',
+      quick_to_prepare: 'Rapide ({minutes} min)',
+    },
   },
 } as const
 

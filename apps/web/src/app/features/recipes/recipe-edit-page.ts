@@ -6,7 +6,13 @@ import { HouseholdStore } from '../../core/household/household-store';
 import { TranslatePipe } from '../../shared/i18n/translate';
 import { StockApi } from '../stock/stock-api';
 import { RecipesApi } from './recipes-api';
-import type { Product, Recipe, RecipeFeasibility, Unit } from '../../core/api/types';
+import type {
+  Product,
+  Recipe,
+  RecipeFeasibility,
+  RecipeNutrition,
+  Unit,
+} from '../../core/api/types';
 
 interface IngredientDraft {
   productId: string;
@@ -51,6 +57,25 @@ const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
         >
           {{ (f.feasible ? 'recipes.feasible' : 'recipes.notFeasible') | t }}
         </p>
+      }
+
+      @if (nutrition(); as n) {
+        <section class="card !py-3">
+          <h2 class="text-sm font-semibold text-muted">
+            {{ 'nutrition.title' | t }} — {{ 'nutrition.perServing' | t }}
+          </h2>
+          <p class="mt-1 flex flex-wrap gap-3 text-sm">
+            <span class="font-semibold">{{ n.perServing.kcal ?? '—' }} {{ 'nutrition.kcal' | t }}</span>
+            <span>{{ 'nutrition.proteins' | t }} {{ n.perServing.proteins ?? '—' }} g</span>
+            <span>{{ 'nutrition.carbohydrates' | t }} {{ n.perServing.carbohydrates ?? '—' }} g</span>
+            <span>{{ 'nutrition.fat' | t }} {{ n.perServing.fat ?? '—' }} g</span>
+          </p>
+          @if (n.missingProducts.length > 0) {
+            <p class="mt-1 text-xs text-muted">
+              {{ 'nutrition.missingData' | t: { products: n.missingProducts.join(', ') } }}
+            </p>
+          }
+        </section>
       }
 
       <form class="flex flex-col gap-4" (ngSubmit)="save()">
@@ -209,6 +234,7 @@ export class RecipeEditPage implements OnInit {
   protected readonly ingredients = signal<IngredientDraft[]>([]);
   protected readonly steps = signal<string[]>([]);
   protected readonly feasibility = signal<RecipeFeasibility | null>(null);
+  protected readonly nutrition = signal<RecipeNutrition | null>(null);
 
   protected readonly productSearch = signal('');
   protected readonly productResults = signal<Product[]>([]);
@@ -232,7 +258,12 @@ export class RecipeEditPage implements OnInit {
     }
     const recipe = await this.recipesApi.get(this.householdId, recipeId);
     this.hydrate(recipe);
-    this.feasibility.set(await this.recipesApi.feasibility(this.householdId, recipeId));
+    const [feasibility, nutrition] = await Promise.all([
+      this.recipesApi.feasibility(this.householdId, recipeId),
+      this.recipesApi.nutrition(this.householdId, recipeId),
+    ]);
+    this.feasibility.set(feasibility);
+    this.nutrition.set(nutrition);
   }
 
   protected onProductSearch(value: string): void {

@@ -8,7 +8,13 @@ import { HouseholdStore } from '../../core/household/household-store';
 import { TranslatePipe } from '../../shared/i18n/translate';
 import { RecipesApi } from '../recipes/recipes-api';
 import { PlanningApi } from './planning-api';
-import type { MealType, PlannedMeal, Recipe } from '../../core/api/types';
+import type {
+  DailyNutrition,
+  MealType,
+  PlannedMeal,
+  Recipe,
+  Recommendation,
+} from '../../core/api/types';
 
 const DAY_MS = 86_400_000;
 const DAY_LABELS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -50,6 +56,22 @@ function mondayOf(date: Date): Date {
         <p class="rounded-xl bg-surface px-3 py-2 text-sm text-warning">
           {{ 'planning.conflict' | t }}
         </p>
+      }
+
+      @if (todayNutrition(); as nutrition) {
+        @if (nutrition.meals.length > 0) {
+          <section class="card !py-3">
+            <h2 class="text-sm font-semibold text-muted">{{ 'nutrition.today' | t }}</h2>
+            <p class="mt-1 flex flex-wrap gap-3 text-sm">
+              <span class="font-semibold">
+                {{ nutrition.totals.kcal ?? '—' }} {{ 'nutrition.kcal' | t }}
+              </span>
+              <span>{{ 'nutrition.proteins' | t }} {{ nutrition.totals.proteins ?? '—' }} g</span>
+              <span>{{ 'nutrition.carbohydrates' | t }} {{ nutrition.totals.carbohydrates ?? '—' }} g</span>
+              <span>{{ 'nutrition.fat' | t }} {{ nutrition.totals.fat ?? '—' }} g</span>
+            </p>
+          </section>
+        }
       }
 
       @for (day of days(); track day.date) {
@@ -147,6 +169,30 @@ function mondayOf(date: Date): Date {
           >
             <h2 class="font-semibold">{{ 'planning.addMeal' | t }} — {{ date }}</h2>
 
+            @if (suggestions().length > 0) {
+              <div class="flex flex-col gap-1">
+                <h3 class="text-sm font-semibold text-muted">{{ 'suggestions.title' | t }}</h3>
+                @for (suggestion of suggestions(); track suggestion.recipeId) {
+                  <button
+                    type="button"
+                    class="rounded-xl border px-3 py-2 text-left text-sm transition-colors"
+                    [class.border-primary]="newRecipeId === suggestion.recipeId"
+                    [class.border-line]="newRecipeId !== suggestion.recipeId"
+                    (click)="pickSuggestion(suggestion)"
+                  >
+                    <span class="font-medium">{{ suggestion.recipeName }}</span>
+                    <span class="mt-0.5 flex flex-wrap gap-1">
+                      @for (reason of suggestion.reasons.slice(0, 2); track reason.code) {
+                        <span class="rounded-full bg-surface px-2 py-0.5 text-xs text-muted">
+                          {{ 'suggestions.reasons.' + reason.code | t: reason.params }}
+                        </span>
+                      }
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+
             @if (mealTypes().length === 0) {
               <p class="error-text">{{ 'planning.noMealTypes' | t }}</p>
             } @else {
@@ -206,6 +252,8 @@ export class PlanningPage implements OnInit {
   protected readonly recipes = signal<Recipe[]>([]);
   protected readonly conflict = signal(false);
   protected readonly saving = signal(false);
+  protected readonly todayNutrition = signal<DailyNutrition | null>(null);
+  protected readonly suggestions = signal<Recommendation[]>([]);
 
   protected readonly addingDate = signal<string | null>(null);
   protected newMealTypeId = '';
@@ -266,6 +314,23 @@ export class PlanningPage implements OnInit {
   protected openAddMeal(date: string): void {
     this.addingDate.set(date);
     this.newRecipeId = '';
+    void this.loadSuggestions();
+  }
+
+  protected pickSuggestion(suggestion: Recommendation): void {
+    this.newRecipeId = suggestion.recipeId;
+  }
+
+  private async loadSuggestions(): Promise<void> {
+    if (!this.householdId) {
+      return;
+    }
+    try {
+      const { recommendations } = await this.recipesApi.recommendations(this.householdId, 3);
+      this.suggestions.set(recommendations);
+    } catch {
+      this.suggestions.set([]);
+    }
   }
 
   protected async createMeal(): Promise<void> {
@@ -321,5 +386,14 @@ export class PlanningPage implements OnInit {
     const to = toIsoDate(new Date(this.weekStart().getTime() + 6 * DAY_MS));
     this.meals.set(await this.planningApi.list(this.householdId, from, to));
     this.conflict.set(false);
+
+    /** Résumé nutritionnel du jour (spec §2), silencieux en cas d'échec. */
+    try {
+      this.todayNutrition.set(
+        await this.planningApi.dailyNutrition(this.householdId, toIsoDate(new Date())),
+      );
+    } catch {
+      this.todayNutrition.set(null);
+    }
   }
 }

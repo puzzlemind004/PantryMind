@@ -25,6 +25,13 @@ export class HouseholdApi {
     return firstValueFrom(this.api.patch<Household>(`/households/${householdId}`, { name }));
   }
 
+  updateSettings(
+    householdId: string,
+    settings: { automaticMode?: boolean },
+  ): Promise<Household> {
+    return firstValueFrom(this.api.patch<Household>(`/households/${householdId}`, { settings }));
+  }
+
   createInvitation(householdId: string, role?: HouseholdRole): Promise<HouseholdInvitation> {
     return firstValueFrom(
       this.api.post<HouseholdInvitation>(`/households/${householdId}/invitations`, { role }),

@@ -280,6 +280,36 @@ export interface ProductThreshold {
   unit: Unit;
 }
 
+export type NutritionTotals = Partial<
+  Record<
+    'kcal' | 'proteins' | 'carbohydrates' | 'sugars' | 'fat' | 'saturatedFat' | 'fiber' | 'salt',
+    number
+  >
+>;
+
+export interface RecipeNutrition {
+  servings: number;
+  total: NutritionTotals;
+  perServing: NutritionTotals;
+  coveredIngredients: number;
+  totalIngredients: number;
+  missingProducts: string[];
+}
+
+export interface DailyNutrition {
+  date: string;
+  totals: NutritionTotals;
+  meals: { mealId: string; mealName: string; status: string; totals: NutritionTotals }[];
+}
+
+export interface Recommendation {
+  recipeId: string;
+  recipeName: string;
+  totalMinutes: number | null;
+  score: number;
+  reasons: { code: string; params?: Record<string, string | number> }[];
+}
+
 export interface StockMovement {
   id: string;
   stockItemId: string;
