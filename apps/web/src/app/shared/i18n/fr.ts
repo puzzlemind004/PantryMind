@@ -5,7 +5,7 @@
  */
 export const fr = {
   app: {
-    name: 'Cooking',
+    name: 'PantryMind',
     loading: 'Chargement…',
     retry: 'Réessayer',
     cancel: 'Annuler',

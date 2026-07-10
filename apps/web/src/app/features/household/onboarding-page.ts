@@ -4,14 +4,16 @@ import { Router } from '@angular/router';
 
 import { HouseholdStore } from '../../core/household/household-store';
 import { TranslatePipe } from '../../shared/i18n/translate';
+import { AppLogo } from '../../shared/ui/app-logo';
 
 /** Premier lancement : créer son foyer ou en rejoindre un par code. */
 @Component({
   selector: 'app-onboarding-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, AppLogo],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-6 py-10">
+      <app-logo [size]="48" />
       <header class="text-center">
         <h1 class="text-2xl font-bold">{{ 'onboarding.title' | t }}</h1>
         <p class="mt-1 text-muted">{{ 'onboarding.subtitle' | t }}</p>

@@ -1,31 +1,33 @@
 /*
- * Charte graphique centralisée (spec §10.8).
+ * Charte graphique PantryMind (spec §10.8).
  *
- * Palette temporaire (placeholder) : l'identité visuelle définitive du produit
- * n'existe pas encore. Tous les composants consomment exclusivement ces tokens
- * sémantiques — redéfinir ce fichier suffit à rethémer l'application.
+ * Couleurs extraites du logo officiel (resource/logo_short.png) :
+ * orange #F76A36 et bleu marine #0A2B6E. Tous les composants consomment
+ * exclusivement ces tokens sémantiques — redéfinir ce fichier suffit à
+ * rethémer l'application.
  */
 @theme {
   /* Typographie */
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* Couleurs de marque */
-  --color-primary: oklch(0.58 0.15 155);
-  --color-primary-strong: oklch(0.46 0.14 155);
-  --color-primary-soft: oklch(0.95 0.04 155);
+  --color-primary: #f76a36;
+  --color-primary-strong: #d94f1d;
+  --color-primary-soft: #fdeee6;
   --color-on-primary: #ffffff;
+  --color-brand-navy: #0a2b6e;
 
-  /* Surfaces et texte */
-  --color-surface: oklch(0.985 0.003 155);
+  /* Surfaces et texte — neutres légèrement chauds, encre tirée du marine */
+  --color-surface: #faf9f7;
   --color-surface-raised: #ffffff;
-  --color-ink: oklch(0.25 0.02 260);
-  --color-muted: oklch(0.52 0.02 260);
-  --color-line: oklch(0.91 0.006 260);
+  --color-ink: #1c2a4a;
+  --color-muted: #5d6779;
+  --color-line: #e7e3dd;
 
   /* Couleurs d'état */
-  --color-success: oklch(0.58 0.15 155);
-  --color-warning: oklch(0.72 0.15 75);
-  --color-danger: oklch(0.55 0.2 27);
+  --color-success: #2e9e5b;
+  --color-warning: #db8b0b;
+  --color-danger: #d43a2f;
 
   /* Formes */
   --radius-card: 1rem;

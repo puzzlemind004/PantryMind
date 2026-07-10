@@ -4,14 +4,15 @@ import { Router, RouterLink } from '@angular/router';
 
 import { AuthStore } from '../../core/auth/auth-store';
 import { TranslatePipe } from '../../shared/i18n/translate';
+import { AppLogo } from '../../shared/ui/app-logo';
 
 @Component({
   selector: 'app-login-page',
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, AppLogo],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-6 py-10">
-      <h1 class="text-center text-3xl font-bold text-primary">{{ 'app.name' | t }}</h1>
+      <app-logo [size]="56" />
 
       <form class="card flex flex-col gap-4" (ngSubmit)="submit()">
         <h2 class="text-xl font-semibold">{{ 'auth.login.title' | t }}</h2>
