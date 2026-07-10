@@ -44,6 +44,10 @@ services:
       DB_USER: ${COOKING_DB_USER}
       DB_PASSWORD: ${COOKING_DB_PASSWORD}
       DB_DATABASE: ${COOKING_DB_DATABASE}
+      # Web Push (notifications désactivées si vide)
+      VAPID_PUBLIC_KEY: ${COOKING_VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${COOKING_VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${COOKING_VAPID_SUBJECT:-}
     depends_on:
       postgres:
         condition: service_healthy
