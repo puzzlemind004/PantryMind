@@ -5,6 +5,7 @@
 
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
+  Ciqual: () => import('#controllers/ciqual_controller'),
   HouseholdInvitations: () => import('#controllers/household_invitations_controller'),
   HouseholdMembers: () => import('#controllers/household_members_controller'),
   Households: () => import('#controllers/households_controller'),

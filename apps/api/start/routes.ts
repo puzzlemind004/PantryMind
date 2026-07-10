@@ -161,6 +161,12 @@ router
           })
           .use(middleware.household({ role: 'member' }))
 
+        // CIQUAL: reference nutrition for generic products
+        router.get('ciqual', [controllers.Ciqual, 'search'])
+        router
+          .post('products/:productId/ciqual', [controllers.Ciqual, 'link'])
+          .use(middleware.household({ role: 'member' }))
+
         // Nutrition: recipe, meal and daily summaries (spec §2)
         router.get('recipes/:recipeId/nutrition', [controllers.Nutrition, 'recipe'])
         router.get('planned-meals/:mealId/nutrition', [controllers.Nutrition, 'meal'])
