@@ -50,11 +50,24 @@ export default class ShoppingService {
    * packages (5.15). Manual and already-checked items are preserved —
    * the list stays recomputable at any time without losing user input.
    */
-  static async generate(household: Household, user: User, options: { days?: number } = {}) {
-    const days = options.days ?? 7
-    const list = await this.activeList(household)
+  static async generate(
+    household: Household,
+    user: User,
+    options: { shoppingDate?: DateTime; nextShoppingDate?: DateTime } = {}
+  ) {
+    const shoppingDate = (options.shoppingDate ?? DateTime.now()).startOf('day')
+    const nextShoppingDate = (options.nextShoppingDate ?? shoppingDate.plus({ days: 7 })).startOf(
+      'day'
+    )
+    if (nextShoppingDate <= shoppingDate) {
+      throw new Exception('La date des prochaines courses doit suivre celle des courses', {
+        status: 422,
+        code: 'INVALID_SHOPPING_WINDOW',
+      })
+    }
 
-    const needs = await this.computeNeeds(household, days)
+    const list = await this.activeList(household)
+    const needs = await this.computeNeeds(household, shoppingDate, nextShoppingDate)
 
     await db.transaction(async (trx) => {
       list.useTransaction(trx)
@@ -93,7 +106,11 @@ export default class ShoppingService {
         action: 'shopping_list.generated',
         subjectType: 'shopping_list',
         subjectId: list.id,
-        data: { items: needs.length, horizonDays: days },
+        data: {
+          items: needs.length,
+          shoppingDate: shoppingDate.toISODate(),
+          nextShoppingDate: nextShoppingDate.toISODate(),
+        },
         trx,
       })
     })
@@ -203,18 +220,19 @@ export default class ShoppingService {
     return item
   }
 
-  /** Needs = planning deficit + threshold top-up (5.13, 5.16). */
-  private static async computeNeeds(household: Household, days: number): Promise<ComputedNeed[]> {
-    const from = DateTime.now().toISODate()
-    const to = DateTime.now().plus({ days }).toISODate()
-
+  /**
+   * Aggregated non-optional snapshot needs of the planned meals whose
+   * date is in [from, to) — merged per product with unit conversions
+   * (spec 5.14). Optional ingredients are never bought (spec 5.9).
+   */
+  private static async aggregateMealNeeds(household: Household, from: DateTime, to: DateTime) {
     const meals = await PlannedMeal.query()
       .where('household_id', household.id)
       .where('status', 'planned')
-      .whereBetween('date', [from, to])
+      .where('date', '>=', from.toISODate()!)
+      .where('date', '<', to.toISODate()!)
       .preload('recipes')
 
-    /** Aggregate snapshot needs; optional ingredients are never bought. */
     const required: {
       productId: string
       productName: string
@@ -251,10 +269,38 @@ export default class ShoppingService {
         }
       }
     }
+    return required
+  }
 
-    const thresholds = await ProductThreshold.query()
-      .where('household_id', household.id)
-      .preload('product')
+  /**
+   * Shopping window (spec 5.24): the list reflects the situation at
+   * shopping time, not the instantaneous stock —
+   * projected stock = current availability − needs before the shopping
+   * date; the list covers the needs between the two shopping dates.
+   */
+  private static async computeNeeds(
+    household: Household,
+    shoppingDate: DateTime,
+    nextShoppingDate: DateTime
+  ): Promise<ComputedNeed[]> {
+    const today = DateTime.now().startOf('day')
+
+    const [needsBefore, required, thresholds] = await Promise.all([
+      shoppingDate > today
+        ? this.aggregateMealNeeds(household, today, shoppingDate)
+        : Promise.resolve([]),
+      this.aggregateMealNeeds(household, shoppingDate, nextShoppingDate),
+      ProductThreshold.query().where('household_id', household.id).preload('product'),
+    ])
+
+    /** Conversion factors for cross-aggregate unit alignment. */
+    const factorProducts = await Product.query().whereIn('id', [
+      ...new Set([
+        ...needsBefore.map((entry) => entry.productId),
+        ...required.map((entry) => entry.productId),
+      ]),
+    ])
+    const factorsById = new Map(factorProducts.map((product) => [product.id, product]))
 
     const availability = await StockAvailabilityService.availabilityFor(household.id, [
       ...required.map((entry) => ({ productId: entry.productId, unit: entry.unit })),
@@ -264,22 +310,44 @@ export default class ShoppingService {
       })),
     ])
 
+    /** Needs consumed before the shopping day, converted into a target unit. */
+    const beforeInUnit = (productId: string, unit: string): number => {
+      const entry = needsBefore.find((need) => need.productId === productId)
+      if (!entry) {
+        return 0
+      }
+      const factors = factorsById.get(productId)
+      return (
+        UnitService.convert(entry.quantity, entry.unit, unit, {
+          unitWeightGrams: factors?.unitWeightGrams,
+          densityGPerMl: factors?.densityGPerMl,
+        }) ?? 0
+      )
+    }
+
     const needs: ComputedNeed[] = []
 
     for (const entry of required) {
-      const available = availability.get(entry.productId) ?? 0
-      const deficit = Number((entry.quantity - available).toFixed(3))
+      const available =
+        availability.get(StockAvailabilityService.key(entry.productId, entry.unit)) ?? 0
+      const projected = Math.max(available - beforeInUnit(entry.productId, entry.unit), 0)
+      const deficit = Number((entry.quantity - projected).toFixed(3))
       if (deficit > 0) {
         needs.push({ ...entry, quantity: deficit, source: 'planning' })
       }
     }
 
     /**
-     * Threshold top-up (5.16): after the planning is cooked, the stock
-     * should still hold at least min_quantity.
+     * Threshold top-up (5.16): after the period is cooked, the projected
+     * stock should still hold at least min_quantity.
      */
     for (const threshold of thresholds) {
-      const available = availability.get(threshold.productId) ?? 0
+      const available =
+        availability.get(StockAvailabilityService.key(threshold.productId, threshold.unit)) ?? 0
+      const projected = Math.max(
+        available - beforeInUnit(threshold.productId, threshold.unit),
+        0
+      )
       const plannedNeed = required.find((entry) => entry.productId === threshold.productId)
       const plannedInThresholdUnit = plannedNeed
         ? (UnitService.convert(plannedNeed.quantity, plannedNeed.unit, threshold.unit, {
@@ -287,7 +355,7 @@ export default class ShoppingService {
             densityGPerMl: threshold.product.densityGPerMl,
           }) ?? 0)
         : 0
-      const leftoverAfterPlanning = Math.max(available - plannedInThresholdUnit, 0)
+      const leftoverAfterPlanning = Math.max(projected - plannedInThresholdUnit, 0)
       const deficit = Number((threshold.minQuantity - leftoverAfterPlanning).toFixed(3))
       if (deficit <= 0) {
         continue

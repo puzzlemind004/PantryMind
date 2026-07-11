@@ -84,7 +84,8 @@ export default class RecommendationService {
     let availabilityScore = 1
     if (required.length > 0) {
       const ratios = required.map((ingredient) => {
-        const available = availability.get(ingredient.productId) ?? 0
+        const available =
+        availability.get(StockAvailabilityService.key(ingredient.productId, ingredient.unit)) ?? 0
         return Math.min(available / ingredient.quantity, 1)
       })
       availabilityScore = ratios.reduce((sum, ratio) => sum + ratio, 0) / ratios.length

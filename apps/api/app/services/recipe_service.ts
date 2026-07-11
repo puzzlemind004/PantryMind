@@ -156,7 +156,8 @@ export default class RecipeService {
 
     const ingredients = recipe.ingredients.map((ingredient) => {
       const required = Number((ingredient.quantity * ratio).toFixed(3))
-      const available = availability.get(ingredient.productId) ?? 0
+      const available =
+        availability.get(StockAvailabilityService.key(ingredient.productId, ingredient.unit)) ?? 0
       return {
         recipeIngredientId: ingredient.id,
         productId: ingredient.productId,

@@ -20,11 +20,16 @@ export default class ShoppingListsController {
     return serialize(ShoppingListTransformer.transform(list))
   }
 
-  /** Regenerates the computed items (spec 5.13) — manual/checked kept. */
+  /** Regenerates the computed items (spec 5.13, fenêtre 5.24) — manual/checked kept. */
   async generate({ household, auth, request, serialize }: HttpContext) {
-    const { days } = await request.validateUsing(generateShoppingListValidator)
+    const payload = await request.validateUsing(generateShoppingListValidator)
 
-    const list = await ShoppingService.generate(household, auth.getUserOrFail(), { days })
+    const list = await ShoppingService.generate(household, auth.getUserOrFail(), {
+      shoppingDate: payload.shoppingDate ? toDateTime(payload.shoppingDate) : undefined,
+      nextShoppingDate: payload.nextShoppingDate
+        ? toDateTime(payload.nextShoppingDate)
+        : undefined,
+    })
 
     return serialize(ShoppingListTransformer.transform(list))
   }

@@ -14,9 +14,14 @@ export interface AvailabilityRequest {
  * reserves anything (spec 5.1).
  */
 export default class StockAvailabilityService {
+  /** Map key: the same product can be requested in several units. */
+  static key(productId: string, unit: string): string {
+    return `${productId}:${unit}`
+  }
+
   /**
-   * Returns productId → available quantity in the requested unit.
-   * Lots whose unit cannot be converted are ignored in the sum.
+   * Returns key(productId, unit) → available quantity in the requested
+   * unit. Lots whose unit cannot be converted are ignored in the sum.
    */
   static async availabilityFor(
     householdId: string,
@@ -52,7 +57,7 @@ export default class StockAvailabilityService {
           total += converted
         }
       }
-      availability.set(request.productId, Number(total.toFixed(3)))
+      availability.set(this.key(request.productId, request.unit), Number(total.toFixed(3)))
     }
 
     return availability

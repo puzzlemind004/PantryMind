@@ -89,10 +89,11 @@ export default class MealValidationService {
     ])
 
     for (const need of needs) {
-      need.available = availability.get(need.productId) ?? 0
+      need.available = availability.get(StockAvailabilityService.key(need.productId, need.unit)) ?? 0
       need.missing = Math.max(Number((need.quantity - need.available).toFixed(3)), 0)
       for (const substitute of need.substitutes) {
-        substitute.available = availability.get(substitute.productId) ?? 0
+        substitute.available =
+          availability.get(StockAvailabilityService.key(substitute.productId, need.unit)) ?? 0
       }
     }
 

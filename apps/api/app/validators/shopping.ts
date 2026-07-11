@@ -9,8 +9,9 @@ export const upsertThresholdValidator = vine.create({
 })
 
 export const generateShoppingListValidator = vine.create({
-  /** Planning horizon in days (spec 5.13: recettes planifiées). */
-  days: vine.number().min(1).max(30).optional(),
+  /** Fenêtre de courses (spec 5.24) : défauts aujourd'hui → +7 jours. */
+  shoppingDate: vine.date().optional(),
+  nextShoppingDate: vine.date().optional(),
 })
 
 export const addShoppingItemValidator = vine.create({
