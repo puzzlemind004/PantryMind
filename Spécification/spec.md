@@ -11,6 +11,7 @@
 | 0.1 | — | Rédaction initiale de la spécification fonctionnelle. |
 | 0.2 | 2026-07-03 | Intégration des décisions validées avec l'équipe de développement : phasage en lots, stratégie hors ligne, sources de données produits (Open Food Facts, CIQUAL), horaires de repas, suppression du statut « réservé », propriété des recettes par foyer, versioning des recettes par snapshot, facteurs de conversion par produit, authentification. |
 | 0.3 | 2026-07-11 | Retours d'usage réel du porteur : types de produits (le stock et les courses accueillent le non-alimentaire, les recettes restent strictement alimentaires — règle 5.21), congélation d'un lot avec ajustement de la DLC (règle 5.22), création manuelle d'un produit à partir d'un code-barres inconnu (7.10 précisé). Redécoupage du phasage : ces évolutions forment le Lot 5, l'ancien Lot 5 (offline avancé, temps réel) devient le « Lot bonus ». |
+| 0.4 | 2026-07-11 | Intégration de la boîte à idées du porteur : fusion automatique des lots identiques (règle 5.23), fenêtre de courses avec projection du stock (règle 5.24), scan en mode courses (§8.9), duplication multi-jours au planning (§6.4), filtres avancés du stock (§6.1) — regroupés en Lot 6. Le scan de ticket de caisse est cadré en Lot 7 (nécessite une brique OCR). |
 
 ---
 
@@ -227,6 +228,8 @@ Afin de permettre une mise en service progressive et une utilisation réelle au 
 * **Lot 3** : génération et gestion de la liste de courses, validation des achats.
 * **Lot 4** : suivi nutritionnel, moteur de recommandation, notifications push, mode automatique.
 * **Lot 5** : élargissement au non-alimentaire (types de produits, règle 5.21), congélation des lots (règle 5.22), création manuelle d'un produit depuis un code-barres inconnu (7.10).
+* **Lot 6** : fusion automatique des lots identiques (règle 5.23), fenêtre de courses avec projection du stock (règle 5.24), scan en mode courses (§8.9), duplication multi-jours au planning (§6.4), filtres avancés du stock (§6.1).
+* **Lot 7** : scan de ticket de caisse (remplissage du stock par OCR + rapprochement produits — nécessite le choix d'une brique de reconnaissance, à cadrer avec le porteur).
 * **Lot bonus** (non prioritaire, décalé tant que des besoins concrets subsistent) : mode hors ligne avancé, collaboration multi-utilisateur en temps réel.
 
 Le flux prioritaire à couvrir de bout en bout est le suivant :
@@ -946,6 +949,41 @@ Remarques :
 
 ---
 
+## 5.23 Fusion automatique des lots identiques
+
+Multiplier les lignes de stock pour un même produit strictement identique nuit à la lisibilité.
+
+### Règle
+
+Lors de l'ajout d'un lot au stock (manuel ou via les courses), si un lot **disponible** existe déjà avec **le même produit, la même date de péremption (ou son absence), la même unité et le même emplacement**, les deux lots sont **fusionnés** : la quantité est ajoutée au lot existant.
+
+* La fusion est tracée dans l'historique du lot conservé (mouvement d'ajout avec la quantité fusionnée) ;
+* si l'un des critères diffère (DLC, emplacement, unité), les lots restent distincts — la gestion par lot (FIFO, DLC individuelles, règle 4.5) n'est jamais compromise ;
+* un lot congelé ne fusionne qu'avec un lot congelé de mêmes critères.
+
+---
+
+## 5.24 Fenêtre de courses
+
+La liste de courses doit refléter la situation **au moment où les courses seront faites**, pas la situation instantanée.
+
+### Règle
+
+La génération de la liste s'appuie sur deux dates :
+
+* **date des courses** (défaut : aujourd'hui) ;
+* **date des prochaines courses** (défaut : date des courses + 7 jours).
+
+Le calcul :
+
+1. **stock projeté au jour des courses** = stock disponible actuel − besoins des repas planifiés avant la date des courses ;
+2. **besoins de la période** = repas planifiés entre la date des courses (incluse) et la date des prochaines courses (exclue) ;
+3. **liste** = besoins de la période − stock projeté, puis complément des seuils minimums (règle 5.16) calculé sur le stock projeté après réalisation de la période.
+
+Les règles existantes s'appliquent inchangées : fusion des besoins (5.14), conditionnements (5.15), régénération non destructive (5.13).
+
+---
+
 # 6. Description fonctionnelle des modules
 
 Cette section décrit le comportement attendu de chaque module fonctionnel de l’application. Chaque module s’appuie sur les concepts métier et les règles définies précédemment.
@@ -1185,7 +1223,7 @@ L’utilisateur peut :
 * ajouter un repas
 * supprimer un repas
 * déplacer un repas
-* dupliquer un repas
+* dupliquer un repas — vers une date unique **ou vers plusieurs jours d'un coup** (ex. : reporter le petit-déjeuner sur toute la semaine) ; chaque copie est un repas indépendant avec ses propres snapshots
 
 ---
 
@@ -1870,6 +1908,16 @@ Lorsqu’un produit est coché :
 
 * il est ajouté au stock
 * il disparaît de la liste si totalement couvert
+
+---
+
+## Scan en mode courses
+
+En magasin, scanner le code-barres d'un article depuis l'écran Courses :
+
+* si l'article correspond à une ligne non cochée de la liste (même produit), **la ligne est cochée automatiquement** et l'article entre au stock avec la référence commerciale scannée ;
+* si le produit est connu mais absent de la liste (achat non prévu), l'article est **ajouté à la liste et coché** dans la foulée ;
+* si le code-barres est inconnu (localement et via les sources externes), le flux de création manuelle s'applique (7.10).
 
 ---
 

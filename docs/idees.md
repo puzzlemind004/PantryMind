@@ -6,12 +6,12 @@ on évalue ensuite (valeur / complexité / cohérence avec la spec).
 
 | # | Idée | Notée le | Statut |
 | --- | --- | --- | --- |
-| 1 | **Scan en mode courses** : scanner un aliment en magasin coche automatiquement l'article correspondant dans la liste de courses (et l'ajoute au stock avec la bonne référence commerciale). | 2026-07-04 | À évaluer |
-| 2 | **Scan de ticket de caisse** : remplir le stock d'un coup en photographiant le ticket (OCR + rapprochement produits). Déjà évoquée dans la spec §9.9 comme évolution envisagée. | 2026-07-04 | À évaluer |
-| 3 | **Fusion de lots** : proposer de fusionner automatiquement les lots du même produit ayant la même date de péremption (la spec §6.1 prévoit déjà « fusionner ou séparer des lots » manuellement). | 2026-07-04 | À évaluer |
-| 4 | **Duplication intelligente au planning** : dupliquer un repas vers plusieurs jours d'un coup (ex. : le petit-déjeuner, quasi identique, reporté sur toute la semaine). | 2026-07-04 | À évaluer |
-| 5 | **Fenêtre de courses** : à la génération de la liste, donner la date des courses et la date des prochaines courses (défaut : aujourd'hui → +7 j). L'app projette le stock au jour des courses (en déduisant les repas planifiés d'ici là), puis calcule les besoins jusqu'aux courses suivantes ; la liste = la différence. Affine la logique actuelle « stock instantané − besoins à 7 jours ». | 2026-07-04 | À évaluer |
-| 6 | **Filtres avancés du stock** : filtrer par emplacement, catégorie, etc. (l'API accepte déjà `storageLocationId` et `productId` ; il manque l'UI). | 2026-07-04 | À évaluer |
+| 1 | **Scan en mode courses** : scanner un aliment en magasin coche automatiquement l'article correspondant dans la liste de courses (et l'ajoute au stock avec la bonne référence commerciale). | 2026-07-04 | **Retenue (Lot 6)** — spec §8.9 |
+| 2 | **Scan de ticket de caisse** : remplir le stock d'un coup en photographiant le ticket (OCR + rapprochement produits). Déjà évoquée dans la spec §9.9 comme évolution envisagée. | 2026-07-04 | **Retenue (Lot 7)** — nécessite le choix d'une brique OCR, à cadrer |
+| 3 | **Fusion de lots** : proposer de fusionner automatiquement les lots du même produit ayant la même date de péremption (la spec §6.1 prévoit déjà « fusionner ou séparer des lots » manuellement). | 2026-07-04 | **Retenue (Lot 6)** — règle 5.23 |
+| 4 | **Duplication intelligente au planning** : dupliquer un repas vers plusieurs jours d'un coup (ex. : le petit-déjeuner, quasi identique, reporté sur toute la semaine). | 2026-07-04 | **Retenue (Lot 6)** — spec §6.4 |
+| 5 | **Fenêtre de courses** : à la génération de la liste, donner la date des courses et la date des prochaines courses (défaut : aujourd'hui → +7 j). L'app projette le stock au jour des courses (en déduisant les repas planifiés d'ici là), puis calcule les besoins jusqu'aux courses suivantes ; la liste = la différence. Affine la logique actuelle « stock instantané − besoins à 7 jours ». | 2026-07-04 | **Retenue (Lot 6)** — règle 5.24 |
+| 6 | **Filtres avancés du stock** : filtrer par emplacement, catégorie, etc. (l'API accepte déjà `storageLocationId` et `productId` ; il manque l'UI). | 2026-07-04 | **Retenue (Lot 6)** — spec §6.1 |
 
 ## Comment s'en servir
 
