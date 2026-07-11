@@ -98,6 +98,8 @@ export const fr = {
     filters: {
       all: 'Tout',
       expiringSoon: 'À consommer vite',
+      byLocation: 'Tous les emplacements',
+      byKind: 'Tous les types',
     },
     expired: 'Périmé',
     expiresToday: "Périme aujourd'hui",

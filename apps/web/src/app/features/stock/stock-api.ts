@@ -15,6 +15,7 @@ export interface StockFilters {
   search?: string;
   storageLocationId?: string;
   expiringWithinDays?: number;
+  kind?: string;
 }
 
 @Injectable({ providedIn: 'root' })

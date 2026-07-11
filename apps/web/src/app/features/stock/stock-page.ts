@@ -6,7 +6,7 @@ import { HouseholdApi } from '../../core/household/household-api';
 import { HouseholdStore } from '../../core/household/household-store';
 import { TranslatePipe, TranslateService } from '../../shared/i18n/translate';
 import { StockApi } from './stock-api';
-import type { StockItem, StorageLocation } from '../../core/api/types';
+import type { ProductKind, StockItem, StorageLocation } from '../../core/api/types';
 
 type Filter = 'all' | 'expiringSoon';
 
@@ -58,6 +58,32 @@ type Filter = 'all' | 'expiringSoon';
         >
           {{ 'stock.filters.expiringSoon' | t }}
         </button>
+      </div>
+
+      <!-- Filtres emplacement + type (idée boîte à idées, Lot 6) -->
+      <div class="flex gap-2">
+        <select
+          class="input flex-1 !py-1.5 text-sm"
+          name="locationFilter"
+          [ngModel]="locationFilter()"
+          (ngModelChange)="setLocationFilter($event)"
+        >
+          <option value="">{{ 'stock.filters.byLocation' | t }}</option>
+          @for (location of locations(); track location.id) {
+            <option [value]="location.id">{{ location.name }}</option>
+          }
+        </select>
+        <select
+          class="input flex-1 !py-1.5 text-sm"
+          name="kindFilter"
+          [ngModel]="kindFilter()"
+          (ngModelChange)="setKindFilter($event)"
+        >
+          <option value="">{{ 'stock.filters.byKind' | t }}</option>
+          @for (kind of kinds; track kind) {
+            <option [value]="kind">{{ 'stock.kinds.' + kind | t }}</option>
+          }
+        </select>
       </div>
 
       @if (items(); as list) {
@@ -270,8 +296,12 @@ export class StockPage implements OnInit {
   protected readonly items = signal<StockItem[] | null>(null);
   protected readonly search = signal('');
   protected readonly filter = signal<Filter>('all');
+  protected readonly locationFilter = signal('');
+  protected readonly kindFilter = signal('');
   protected readonly locations = signal<StorageLocation[]>([]);
   protected readonly pending = signal(false);
+
+  protected readonly kinds: ProductKind[] = ['food', 'cleaning', 'hygiene', 'pet', 'other'];
 
   /** Lot ouvert dans la fiche d'édition. */
   protected readonly selected = signal<StockItem | null>(null);
@@ -307,6 +337,16 @@ export class StockPage implements OnInit {
 
   protected setFilter(filter: Filter): void {
     this.filter.set(filter);
+    void this.refresh();
+  }
+
+  protected setLocationFilter(locationId: string): void {
+    this.locationFilter.set(locationId);
+    void this.refresh();
+  }
+
+  protected setKindFilter(kind: string): void {
+    this.kindFilter.set(kind);
     void this.refresh();
   }
 
@@ -403,6 +443,8 @@ export class StockPage implements OnInit {
       await this.stockApi.listItems(householdId, {
         search: this.search() || undefined,
         expiringWithinDays: this.filter() === 'expiringSoon' ? 7 : undefined,
+        storageLocationId: this.locationFilter() || undefined,
+        kind: this.kindFilter() || undefined,
       }),
     );
   }
