@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 import { HouseholdStore } from '../../core/household/household-store';
-import { TranslatePipe } from '../../shared/i18n/translate';
+import { TranslatePipe, TranslateService } from '../../shared/i18n/translate';
+import { BarcodeScanner } from '../stock/barcode-scanner';
 import { StockApi } from '../stock/stock-api';
 import { ShoppingApi } from './shopping-api';
 import type {
@@ -15,13 +17,17 @@ import type {
 
 const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
 
+function toIsoDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 /**
  * Écran courses (spec §8.9) : liste générée + manuelle, cocher un
  * article l'ajoute au stock, section seuils de réapprovisionnement.
  */
 @Component({
   selector: 'app-shopping-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, BarcodeScanner],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto flex max-w-lg flex-col gap-3 p-4">
@@ -29,13 +35,49 @@ const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
         <h1 class="text-2xl font-bold">{{ 'shopping.title' | t }}</h1>
         <button
           type="button"
-          class="btn-primary !w-auto px-4 py-2 text-sm"
+          class="btn-secondary !px-3 !py-2 text-sm"
+          (click)="scanning.set(!scanning())"
+        >
+          📷 {{ 'shopping.scan' | t }}
+        </button>
+      </header>
+
+      <!-- Scan en magasin (spec §8.9) -->
+      @if (scanning()) {
+        <section class="card flex flex-col gap-2 border-primary">
+          <app-barcode-scanner (detected)="onScan($event)" />
+          <button class="btn-secondary" type="button" (click)="scanning.set(false)">
+            {{ 'app.cancel' | t }}
+          </button>
+        </section>
+      }
+      @if (scanFeedback(); as feedback) {
+        <p class="rounded-xl bg-primary-soft px-3 py-2 text-sm font-medium text-primary">
+          {{ feedback }}
+        </p>
+      }
+
+      <!-- Fenêtre de courses (spec 5.24) -->
+      <section class="card flex flex-col gap-2 !py-3">
+        <div class="flex gap-3">
+          <label class="flex flex-1 flex-col gap-1">
+            <span class="text-xs font-medium text-muted">{{ 'shopping.shoppingDate' | t }}</span>
+            <input class="input !py-1.5" type="date" name="shoppingDate" [(ngModel)]="shoppingDate" />
+          </label>
+          <label class="flex flex-1 flex-col gap-1">
+            <span class="text-xs font-medium text-muted">{{ 'shopping.nextShoppingDate' | t }}</span>
+            <input class="input !py-1.5" type="date" name="nextShoppingDate" [(ngModel)]="nextShoppingDate" />
+          </label>
+        </div>
+        <button
+          type="button"
+          class="btn-primary"
           [disabled]="pending()"
           (click)="generate()"
         >
           ⟳ {{ 'shopping.generate' | t }}
         </button>
-      </header>
+      </section>
 
       @if (list(); as shoppingList) {
         @if ((shoppingList.items ?? []).length === 0) {
@@ -203,11 +245,19 @@ export class ShoppingPage implements OnInit {
   private readonly householdStore = inject(HouseholdStore);
   private readonly shoppingApi = inject(ShoppingApi);
   private readonly stockApi = inject(StockApi);
+  private readonly translate = inject(TranslateService);
 
   protected readonly units = UNITS;
   protected readonly list = signal<ShoppingList | null>(null);
   protected readonly thresholds = signal<ProductThreshold[]>([]);
   protected readonly pending = signal(false);
+
+  /** Fenêtre de courses (spec 5.24) : aujourd'hui → +7 jours par défaut. */
+  protected shoppingDate = toIsoDate(new Date());
+  protected nextShoppingDate = toIsoDate(new Date(Date.now() + 7 * 86_400_000));
+
+  protected readonly scanning = signal(false);
+  protected readonly scanFeedback = signal<string | null>(null);
 
   protected readonly productSearch = signal('');
   protected readonly productResults = signal<Product[]>([]);
@@ -251,9 +301,38 @@ export class ShoppingPage implements OnInit {
     }
     this.pending.set(true);
     try {
-      this.list.set(await this.shoppingApi.generate(this.householdId));
+      this.list.set(
+        await this.shoppingApi.generate(this.householdId, {
+          shoppingDate: this.shoppingDate || undefined,
+          nextShoppingDate: this.nextShoppingDate || undefined,
+        }),
+      );
     } finally {
       this.pending.set(false);
+    }
+  }
+
+  /** Scan en magasin (spec §8.9) : coche l'article prévu ou l'ajoute coché. */
+  protected async onScan(barcode: string): Promise<void> {
+    if (!this.householdId) {
+      return;
+    }
+    this.scanning.set(false);
+    try {
+      const result = await this.shoppingApi.scan(this.householdId, barcode);
+      this.list.set(result.list);
+      this.scanFeedback.set(
+        this.translate.translate(
+          result.status === 'checked' ? 'shopping.scanChecked' : 'shopping.scanAdded',
+          { name: result.productName },
+        ),
+      );
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.scanFeedback.set(this.translate.translate('shopping.scanUnknown'));
+        return;
+      }
+      throw error;
     }
   }
 

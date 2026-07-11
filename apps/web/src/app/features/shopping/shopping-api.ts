@@ -12,9 +12,24 @@ export class ShoppingApi {
     return firstValueFrom(this.api.get<ShoppingList>(`/households/${householdId}/shopping-list`));
   }
 
-  generate(householdId: string, days?: number): Promise<ShoppingList> {
+  generate(
+    householdId: string,
+    window: { shoppingDate?: string; nextShoppingDate?: string } = {},
+  ): Promise<ShoppingList> {
     return firstValueFrom(
-      this.api.post<ShoppingList>(`/households/${householdId}/shopping-list/generate`, { days }),
+      this.api.post<ShoppingList>(`/households/${householdId}/shopping-list/generate`, window),
+    );
+  }
+
+  scan(
+    householdId: string,
+    barcode: string,
+  ): Promise<{ status: 'checked' | 'added'; productName: string; list: ShoppingList }> {
+    return firstValueFrom(
+      this.api.post<{ status: 'checked' | 'added'; productName: string; list: ShoppingList }>(
+        `/households/${householdId}/shopping-list/scan`,
+        { barcode },
+      ),
     );
   }
 
