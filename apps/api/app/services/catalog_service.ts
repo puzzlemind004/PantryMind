@@ -16,7 +16,7 @@ export default class CatalogService {
    * Searches products visible to a household: its own products plus the
    * global catalogue (spec §6.2).
    */
-  static searchQuery(household: Household, search?: string) {
+  static searchQuery(household: Household, search?: string, kind?: string) {
     const query = Product.query()
       .where((scope) => {
         scope.whereNull('household_id').orWhere('household_id', household.id)
@@ -25,6 +25,10 @@ export default class CatalogService {
 
     if (search) {
       query.whereILike('name', `%${search}%`)
+    }
+    /** e.g. the recipe ingredient picker only sees food (spec 5.21). */
+    if (kind) {
+      query.where('kind', kind)
     }
 
     return query
@@ -35,10 +39,12 @@ export default class CatalogService {
     household: Household,
     payload: {
       name: string
+      kind?: Product['kind']
       category?: string | null
       defaultUnit?: string
       unitWeightGrams?: number | null
       densityGPerMl?: number | null
+      freezeShelfLifeDays?: number | null
       nutritionPer100?: Product['nutritionPer100']
       allergens?: string[]
     }
@@ -46,10 +52,12 @@ export default class CatalogService {
     return Product.create({
       householdId: household.id,
       name: payload.name,
+      kind: payload.kind ?? 'food',
       category: payload.category ?? null,
       defaultUnit: payload.defaultUnit ?? 'g',
       unitWeightGrams: payload.unitWeightGrams ?? null,
       densityGPerMl: payload.densityGPerMl ?? null,
+      freezeShelfLifeDays: payload.freezeShelfLifeDays ?? null,
       nutritionPer100: payload.nutritionPer100 ?? null,
       allergens: payload.allergens ?? [],
     })
@@ -89,6 +97,7 @@ export default class CatalogService {
       productId?: string
       newProduct?: {
         name: string
+        kind?: Product['kind']
         category?: string | null
         defaultUnit?: string
         unitWeightGrams?: number | null
@@ -113,6 +122,8 @@ export default class CatalogService {
           {
             householdId: payload.source === 'off' ? null : household.id,
             name: payload.newProduct.name,
+            /** OFF products are food by definition (spec 5.21). */
+            kind: payload.source === 'off' ? 'food' : (payload.newProduct.kind ?? 'food'),
             category: payload.newProduct.category ?? null,
             defaultUnit: payload.newProduct.defaultUnit ?? 'g',
             unitWeightGrams: payload.newProduct.unitWeightGrams ?? null,

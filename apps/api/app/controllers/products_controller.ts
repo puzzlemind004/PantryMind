@@ -11,9 +11,9 @@ import {
 export default class ProductsController {
   /** Products visible to the household: its own + the global catalogue. */
   async index({ household, request, serialize }: HttpContext) {
-    const { search } = await request.validateUsing(searchProductsValidator)
+    const { search, kind } = await request.validateUsing(searchProductsValidator)
 
-    const products = await CatalogService.searchQuery(household, search).limit(50)
+    const products = await CatalogService.searchQuery(household, search, kind).limit(50)
 
     return serialize(ProductTransformer.transform(products))
   }

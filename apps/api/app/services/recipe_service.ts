@@ -204,7 +204,10 @@ export default class RecipeService {
     }
   }
 
-  /** All ingredient products must be visible to the household (own or global). */
+  /**
+   * All ingredient products (substitutes included) must be visible to
+   * the household AND edible — recipes are food-only (spec 5.21).
+   */
   private static async assertProductsVisible(
     household: Household,
     ingredients: IngredientPayload[]
@@ -221,18 +224,27 @@ export default class RecipeService {
       return
     }
 
-    const visible = await Product.query()
+    const products = await Product.query()
       .whereIn('id', productIds)
       .where((scope) => {
         scope.whereNull('household_id').orWhere('household_id', household.id)
       })
-      .count('* as total')
 
-    if (Number(visible[0].$extras.total) !== productIds.length) {
+    if (products.length !== productIds.length) {
       throw new Exception('Un ou plusieurs produits sont inconnus pour ce foyer', {
         status: 422,
         code: 'PRODUCT_NOT_FOUND',
       })
+    }
+
+    const nonFood = products.filter((product) => product.kind !== 'food')
+    if (nonFood.length > 0) {
+      throw new Exception(
+        `Produit non alimentaire refusé dans une recette : ${nonFood
+          .map((product) => product.name)
+          .join(', ')}`,
+        { status: 422, code: 'NON_FOOD_INGREDIENT' }
+      )
     }
   }
 

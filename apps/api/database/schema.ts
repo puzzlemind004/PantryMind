@@ -256,7 +256,7 @@ export class ProductThresholdSchema extends BaseModel {
 }
 
 export class ProductSchema extends BaseModel {
-  static $columns = ['allergens', 'category', 'ciqualCode', 'createdAt', 'defaultUnit', 'densityGPerMl', 'householdId', 'id', 'name', 'nutritionPer100', 'unitWeightGrams', 'updatedAt'] as const
+  static $columns = ['allergens', 'category', 'ciqualCode', 'createdAt', 'defaultUnit', 'densityGPerMl', 'freezeShelfLifeDays', 'householdId', 'id', 'kind', 'name', 'nutritionPer100', 'unitWeightGrams', 'updatedAt'] as const
   $columns = ProductSchema.$columns
   @column()
   declare allergens: any
@@ -271,9 +271,13 @@ export class ProductSchema extends BaseModel {
   @column()
   declare densityGPerMl: number | null
   @column()
+  declare freezeShelfLifeDays: number | null
+  @column()
   declare householdId: string | null
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare kind: string
   @column()
   declare name: string
   @column()
@@ -412,7 +416,7 @@ export class ShoppingListSchema extends BaseModel {
 }
 
 export class StockItemSchema extends BaseModel {
-  static $columns = ['addedAt', 'createdAt', 'expiresAt', 'householdId', 'id', 'productId', 'productReferenceId', 'quantity', 'status', 'storageLocationId', 'unit', 'updatedAt', 'version'] as const
+  static $columns = ['addedAt', 'createdAt', 'expiresAt', 'frozenAt', 'householdId', 'id', 'productId', 'productReferenceId', 'quantity', 'status', 'storageLocationId', 'unit', 'updatedAt', 'version'] as const
   $columns = StockItemSchema.$columns
   @column.dateTime()
   declare addedAt: DateTime
@@ -420,6 +424,8 @@ export class StockItemSchema extends BaseModel {
   declare createdAt: DateTime
   @column.date()
   declare expiresAt: DateTime | null
+  @column.dateTime()
+  declare frozenAt: DateTime | null
   @column()
   declare householdId: string
   @column({ isPrimary: true })

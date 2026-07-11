@@ -1,6 +1,7 @@
 import vine from '@vinejs/vine'
 
 import { UNIT_CODES } from '#services/unit_service'
+import { PRODUCT_KINDS } from '#types/catalog'
 
 const nutritionPer100 = () =>
   vine.object({
@@ -16,10 +17,12 @@ const nutritionPer100 = () =>
 
 const productFields = {
   name: vine.string().trim().minLength(1).maxLength(150),
+  kind: vine.enum(PRODUCT_KINDS).optional(),
   category: vine.string().trim().maxLength(100).nullable().optional(),
   defaultUnit: vine.enum(UNIT_CODES).optional(),
   unitWeightGrams: vine.number().positive().nullable().optional(),
   densityGPerMl: vine.number().positive().nullable().optional(),
+  freezeShelfLifeDays: vine.number().min(1).max(3650).nullable().optional(),
   nutritionPer100: nutritionPer100().nullable().optional(),
   allergens: vine.array(vine.string().trim().maxLength(60)).optional(),
 }
@@ -33,6 +36,8 @@ export const updateProductValidator = vine.create({
 
 export const searchProductsValidator = vine.create({
   search: vine.string().trim().maxLength(100).optional(),
+  /** e.g. kind=food for the recipe ingredient picker (spec 5.21). */
+  kind: vine.enum(PRODUCT_KINDS).optional(),
 })
 
 export const createReferenceValidator = vine.create({
@@ -41,6 +46,7 @@ export const createReferenceValidator = vine.create({
   newProduct: vine
     .object({
       name: vine.string().trim().minLength(1).maxLength(150),
+      kind: vine.enum(PRODUCT_KINDS).optional(),
       category: vine.string().trim().maxLength(100).nullable().optional(),
       defaultUnit: vine.enum(UNIT_CODES).optional(),
       unitWeightGrams: vine.number().positive().nullable().optional(),

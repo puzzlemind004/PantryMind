@@ -9,10 +9,12 @@ export default class ProductTransformer extends BaseTransformer<Product> {
       ...this.pick(this.resource, [
         'id',
         'name',
+        'kind',
         'category',
         'defaultUnit',
         'unitWeightGrams',
         'densityGPerMl',
+        'freezeShelfLifeDays',
         'nutritionPer100',
         'allergens',
         'isGlobal',
