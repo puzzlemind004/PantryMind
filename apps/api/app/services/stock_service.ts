@@ -20,7 +20,12 @@ import type { DiscardReason, StockMovementType } from '#types/stock'
  * validated as done (spec §5.1).
  */
 export default class StockService {
-  /** Adds a physical lot to the stock (spec §6.1). */
+  /**
+   * Adds a physical lot to the stock (spec §6.1). When an available lot
+   * with the same product, expiry date, unit, location and frozen state
+   * already exists, quantities are merged into it (spec 5.23) — lot
+   * granularity (FIFO, individual expiry dates) is never compromised.
+   */
   static async addItem(
     household: Household,
     user: User,
@@ -35,6 +40,41 @@ export default class StockService {
     }
   ) {
     return db.transaction(async (trx) => {
+      const movementType = payload.purchased ? 'purchased' : 'added'
+
+      const twinQuery = StockItem.query({ client: trx })
+        .where('household_id', household.id)
+        .where('product_id', payload.productId)
+        .where('status', 'available')
+        .where('unit', payload.unit)
+        .whereNull('frozen_at')
+        .forUpdate()
+      const expiresAt = payload.expiresAt?.toISODate() ?? null
+      if (expiresAt) {
+        twinQuery.where('expires_at', expiresAt)
+      } else {
+        twinQuery.whereNull('expires_at')
+      }
+      if (payload.storageLocationId) {
+        twinQuery.where('storage_location_id', payload.storageLocationId)
+      } else {
+        twinQuery.whereNull('storage_location_id')
+      }
+      const twin = await twinQuery.first()
+
+      if (twin) {
+        twin.quantity = Number((twin.quantity + payload.quantity).toFixed(3))
+        twin.version += 1
+        await twin.save()
+
+        await this.recordMovement(trx, twin, user, movementType, {
+          quantityDelta: payload.quantity,
+          context: { merged: true },
+        })
+
+        return twin
+      }
+
       const item = await StockItem.create(
         {
           householdId: household.id,
@@ -51,7 +91,7 @@ export default class StockService {
         { client: trx }
       )
 
-      await this.recordMovement(trx, item, user, payload.purchased ? 'purchased' : 'added', {
+      await this.recordMovement(trx, item, user, movementType, {
         quantityDelta: payload.quantity,
       })
 
