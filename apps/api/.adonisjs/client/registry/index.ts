@@ -438,6 +438,12 @@ const routes = {
     tokens: [{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":0,"val":"api","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":0,"val":"v1","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":0,"val":"households","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":1,"val":"householdId","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":0,"val":"stock-items","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":1,"val":"itemId","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/discard","type":0,"val":"discard","end":""}],
     types: placeholder as Registry['household.stock_items.discard']['types'],
   },
+  'household.stock_items.freeze': {
+    methods: ["POST"],
+    pattern: '/api/v1/households/:householdId/stock-items/:itemId/freeze',
+    tokens: [{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":0,"val":"api","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":0,"val":"v1","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":0,"val":"households","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":1,"val":"householdId","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":0,"val":"stock-items","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":1,"val":"itemId","end":""},{"old":"/api/v1/households/:householdId/stock-items/:itemId/freeze","type":0,"val":"freeze","end":""}],
+    types: placeholder as Registry['household.stock_items.freeze']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

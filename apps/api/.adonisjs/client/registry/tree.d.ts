@@ -126,6 +126,7 @@ export interface ApiDefinition {
       update: typeof routes['household.stock_items.update']
       consume: typeof routes['household.stock_items.consume']
       discard: typeof routes['household.stock_items.discard']
+      freeze: typeof routes['household.stock_items.freeze']
     }
   }
 }

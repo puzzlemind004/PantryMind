@@ -871,4 +871,16 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock_items_controller').default['discard']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'household.stock_items.freeze': {
+    methods: ["POST"]
+    pattern: '/api/v1/households/:householdId/stock-items/:itemId/freeze'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/stock').freezeStockItemValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { householdId: ParamValue; itemId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/stock').freezeStockItemValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/stock_items_controller').default['freeze']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/stock_items_controller').default['freeze']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
 }

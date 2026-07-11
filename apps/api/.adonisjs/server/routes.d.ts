@@ -76,6 +76,7 @@ export type ScannedRoutes = {
     'household.stock_items.update': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.consume': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.discard': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.stock_items.freeze': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
   }
   GET: {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
@@ -159,6 +160,7 @@ export type ScannedRoutes = {
     'household.stock_items.store': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
     'household.stock_items.consume': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
     'household.stock_items.discard': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
+    'household.stock_items.freeze': { paramsTuple: [ParamValue,ParamValue]; params: {'householdId': ParamValue,'itemId': ParamValue} }
   }
   PATCH: {
     'household.households.update': { paramsTuple: [ParamValue]; params: {'householdId': ParamValue} }
