@@ -119,6 +119,57 @@ export default class StockService {
     })
   }
 
+  /** Default freezer shelf life when the product has no specific value (spec 5.22). */
+  static readonly DEFAULT_FREEZE_DAYS = 90
+
+  /**
+   * Freezes a lot (spec 5.22): moves it to a freezer location and
+   * recomputes its expiry date from the product's freezer shelf life.
+   * A frozen lot cannot be re-frozen; thawing is a manual correction.
+   */
+  static async freezeItem(item: StockItem, user: User, storageLocationId: string) {
+    if (item.frozenAt) {
+      throw new Exception('Ce lot est déjà congelé — pas de recongélation', {
+        status: 422,
+        code: 'ALREADY_FROZEN',
+      })
+    }
+    if (item.status !== 'available') {
+      throw new Exception('Seul un lot disponible peut être congelé', {
+        status: 422,
+        code: 'ITEM_NOT_AVAILABLE',
+      })
+    }
+
+    await item.load('product')
+    const freezeDays = item.product.freezeShelfLifeDays ?? this.DEFAULT_FREEZE_DAYS
+
+    return db.transaction(async (trx) => {
+      item.useTransaction(trx)
+
+      const previousExpiresAt = item.expiresAt?.toISODate() ?? null
+      const previousLocationId = item.storageLocationId
+
+      item.frozenAt = DateTime.now()
+      item.storageLocationId = storageLocationId
+      item.expiresAt = DateTime.now().plus({ days: freezeDays })
+      item.version += 1
+      await item.save()
+
+      await this.recordMovement(trx, item, user, 'frozen', {
+        context: {
+          previousExpiresAt,
+          newExpiresAt: item.expiresAt.toISODate(),
+          previousLocationId,
+          newLocationId: storageLocationId,
+          freezeDays,
+        },
+      })
+
+      return item
+    })
+  }
+
   /** Declares a partial or total consumption of a lot (spec §6.1). */
   static async consumeItem(item: StockItem, user: User, quantity?: number) {
     return this.decrementItem(item, user, 'consumed', quantity)

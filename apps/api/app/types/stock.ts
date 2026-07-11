@@ -10,6 +10,7 @@ export const STOCK_MOVEMENT_TYPES = [
   'corrected',
   'moved',
   'purchased',
+  'frozen',
 ] as const
 export type StockMovementType = (typeof STOCK_MOVEMENT_TYPES)[number]
 

@@ -206,6 +206,7 @@ router
             router.patch('stock-items/:itemId', [controllers.StockItems, 'update'])
             router.post('stock-items/:itemId/consume', [controllers.StockItems, 'consume'])
             router.post('stock-items/:itemId/discard', [controllers.StockItems, 'discard'])
+            router.post('stock-items/:itemId/freeze', [controllers.StockItems, 'freeze'])
           })
           .use(middleware.household({ role: 'member' }))
       })

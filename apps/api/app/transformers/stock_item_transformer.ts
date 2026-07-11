@@ -22,6 +22,7 @@ export default class StockItemTransformer extends BaseTransformer<StockItem> {
         'isExpired',
       ]),
       expiresAt: this.resource.expiresAt?.toISODate() ?? null,
+      frozenAt: this.resource.frozenAt?.toISO() ?? null,
       product: ProductTransformer.transform(this.whenLoaded(this.resource.product)),
       productReference: ProductReferenceTransformer.transform(
         this.whenLoaded(this.resource.productReference)

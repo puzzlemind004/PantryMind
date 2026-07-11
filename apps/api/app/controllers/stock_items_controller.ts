@@ -14,6 +14,7 @@ import {
   consumeStockItemValidator,
   correctStockItemValidator,
   discardStockItemValidator,
+  freezeStockItemValidator,
   listStockValidator,
 } from '#validators/stock'
 
@@ -160,6 +161,45 @@ export default class StockItemsController {
     }
 
     await StockService.discardItem(item, auth.getUserOrFail(), quantity, reason)
+
+    return serialize(StockItemTransformer.transform(item))
+  }
+
+  /**
+   * Freezes a lot (spec 5.22): freezer location required — provided or
+   * defaulted to the household's first freezer.
+   */
+  async freeze({ household, params, auth, request, response, serialize }: HttpContext) {
+    const { storageLocationId } = await request.validateUsing(freezeStockItemValidator)
+
+    const item = await this.findItem(household.id, params.itemId)
+    if (!item) {
+      return response.notFound({
+        errors: [{ code: 'STOCK_ITEM_NOT_FOUND', message: 'Stock item not found' }],
+      })
+    }
+
+    const freezerQuery = StorageLocation.query()
+      .where('household_id', household.id)
+      .where('type', 'freezer')
+    if (storageLocationId) {
+      freezerQuery.where('id', storageLocationId)
+    }
+    const freezer = await freezerQuery.orderBy('position').first()
+    if (!freezer) {
+      return response.unprocessableEntity({
+        errors: [
+          {
+            code: 'NO_FREEZER',
+            message: 'Aucun emplacement de type congélateur dans ce foyer',
+          },
+        ],
+      })
+    }
+
+    await StockService.freezeItem(item, auth.getUserOrFail(), freezer.id)
+    await item.load('product')
+    await item.load('storageLocation')
 
     return serialize(StockItemTransformer.transform(item))
   }

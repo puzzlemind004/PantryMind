@@ -37,3 +37,8 @@ export const discardStockItemValidator = vine.create({
   quantity: vine.number().positive().optional(),
   reason: vine.enum(DISCARD_REASONS).optional(),
 })
+
+export const freezeStockItemValidator = vine.create({
+  /** Congélateur cible ; défaut : premier emplacement de type freezer du foyer. */
+  storageLocationId: vine.string().uuid().optional(),
+})
