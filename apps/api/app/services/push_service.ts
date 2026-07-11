@@ -71,7 +71,7 @@ export default class PushService {
             notification: {
               title: payload.title,
               body: payload.body,
-              icon: 'icons/icon-192x192.png',
+              icon: 'icons/pantrymind-192x192.png',
               data: {
                 onActionClick: {
                   default: { operation: 'navigateLastFocusedOrOpen', url: payload.url ?? '/' },
