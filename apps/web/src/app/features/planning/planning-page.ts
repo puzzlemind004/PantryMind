@@ -134,9 +134,9 @@ function mondayOf(date: Date): Date {
                       <button
                         type="button"
                         class="btn-secondary !px-3 !py-1 text-xs"
-                        (click)="duplicateNextWeek(meal)"
+                        (click)="openDuplicate(meal)"
                       >
-                        {{ 'planning.duplicateNextWeek' | t }}
+                        {{ 'planning.duplicateMulti' | t }}
                       </button>
                       <button
                         type="button"
@@ -154,6 +154,56 @@ function mondayOf(date: Date): Date {
             <p class="mt-1 text-xs text-muted">{{ 'planning.emptyDay' | t }}</p>
           }
         </section>
+      }
+
+      <!-- Duplication multi-jours (spec §6.4) -->
+      @if (duplicating(); as meal) {
+        <div
+          class="fixed inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center"
+          (click)="duplicating.set(null)"
+        >
+          <div
+            class="card flex w-full max-w-lg flex-col gap-3 rounded-b-none border-primary sm:rounded-b-[var(--radius-card)]"
+            (click)="$event.stopPropagation()"
+          >
+            <h2 class="font-semibold">{{ meal.mealName }} — {{ 'planning.duplicateDays' | t }}</h2>
+
+            <div class="grid grid-cols-2 gap-1">
+              @for (option of duplicateOptions(); track option.iso) {
+                <label
+                  class="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm"
+                  [class.border-primary]="duplicateTargets().has(option.iso)"
+                  [class.border-line]="!duplicateTargets().has(option.iso)"
+                >
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 accent-[var(--color-primary)]"
+                    [checked]="duplicateTargets().has(option.iso)"
+                    (change)="toggleDuplicateTarget(option.iso)"
+                  />
+                  {{ option.label }}
+                </label>
+              }
+            </div>
+            <button type="button" class="btn-secondary text-sm" (click)="selectWholeWeek()">
+              {{ 'planning.duplicateWholeWeek' | t }}
+            </button>
+
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="btn-primary flex-1"
+                [disabled]="duplicateTargets().size === 0 || saving()"
+                (click)="confirmDuplicate()"
+              >
+                {{ 'planning.duplicateConfirm' | t: { count: duplicateTargets().size } }}
+              </button>
+              <button type="button" class="btn-secondary" (click)="duplicating.set(null)">
+                {{ 'app.cancel' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
       }
 
       <!-- Ajout de repas : modal plein écran mobile (retour utilisateur :
@@ -254,6 +304,24 @@ export class PlanningPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly todayNutrition = signal<DailyNutrition | null>(null);
   protected readonly suggestions = signal<Recommendation[]>([]);
+
+  /** Duplication multi-jours (spec §6.4) : repas source + jours cochés. */
+  protected readonly duplicating = signal<PlannedMeal | null>(null);
+  protected readonly duplicateTargets = signal<Set<string>>(new Set());
+  protected readonly duplicateOptions = computed(() => {
+    const meal = this.duplicating();
+    if (!meal) {
+      return [];
+    }
+    const origin = new Date(meal.date + 'T12:00:00');
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(origin.getTime() + (index + 1) * DAY_MS);
+      return {
+        iso: toIsoDate(date),
+        label: `${DAY_LABELS[(date.getDay() + 6) % 7]} ${date.getDate()}/${date.getMonth() + 1}`,
+      };
+    });
+  });
 
   protected readonly addingDate = signal<string | null>(null);
   protected newMealTypeId = '';
@@ -363,17 +431,43 @@ export class PlanningPage implements OnInit {
     await this.refresh();
   }
 
-  protected async duplicateNextWeek(meal: PlannedMeal): Promise<void> {
-    if (!this.householdId) {
+  protected openDuplicate(meal: PlannedMeal): void {
+    this.duplicating.set(meal);
+    this.duplicateTargets.set(new Set());
+  }
+
+  protected toggleDuplicateTarget(iso: string): void {
+    this.duplicateTargets.update((targets) => {
+      const next = new Set(targets);
+      if (next.has(iso)) {
+        next.delete(iso);
+      } else {
+        next.add(iso);
+      }
+      return next;
+    });
+  }
+
+  protected selectWholeWeek(): void {
+    this.duplicateTargets.set(new Set(this.duplicateOptions().map((option) => option.iso)));
+  }
+
+  protected async confirmDuplicate(): Promise<void> {
+    const meal = this.duplicating();
+    if (!this.householdId || !meal || this.duplicateTargets().size === 0) {
       return;
     }
-    const target = toIsoDate(new Date(new Date(meal.date + 'T12:00:00').getTime() + 7 * DAY_MS));
+    this.saving.set(true);
     try {
-      await this.planningApi.duplicate(this.householdId, meal.id, target);
+      await this.planningApi.duplicate(this.householdId, meal.id, [...this.duplicateTargets()].sort());
+      this.duplicating.set(null);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 409) {
         this.conflict.set(true);
+        this.duplicating.set(null);
       }
+    } finally {
+      this.saving.set(false);
     }
     await this.refresh();
   }

@@ -51,11 +51,17 @@ export class PlanningApi {
     );
   }
 
-  duplicate(householdId: string, mealId: string, date: string): Promise<PlannedMeal> {
+  /** Duplication vers un ou plusieurs jours (spec §6.4). */
+  duplicate(
+    householdId: string,
+    mealId: string,
+    dates: string[],
+  ): Promise<{ meals: PlannedMeal[] }> {
     return firstValueFrom(
-      this.api.post<PlannedMeal>(`/households/${householdId}/planned-meals/${mealId}/duplicate`, {
-        date,
-      }),
+      this.api.post<{ meals: PlannedMeal[] }>(
+        `/households/${householdId}/planned-meals/${mealId}/duplicate`,
+        { dates },
+      ),
     );
   }
 
