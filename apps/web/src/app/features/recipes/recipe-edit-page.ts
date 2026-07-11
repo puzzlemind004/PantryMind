@@ -408,6 +408,7 @@ export class RecipeEditPage implements OnInit {
       this.productResults.set([]);
       return;
     }
-    this.productResults.set(await this.stockApi.searchProducts(this.householdId, search));
+    /** Recettes strictement alimentaires (spec 5.21). */
+    this.productResults.set(await this.stockApi.searchProducts(this.householdId, search, 'food'));
   }
 }

@@ -10,12 +10,14 @@ import { StockApi } from './stock-api';
 import type {
   ExternalProductData,
   Product,
+  ProductKind,
   ProductReference,
   StorageLocation,
   Unit,
 } from '../../core/api/types';
 
 const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
+const KINDS: ProductKind[] = ['food', 'cleaning', 'hygiene', 'pet', 'other'];
 
 /**
  * Ajout au stock (spec §8.4) : scan de code-barres prioritaire,
@@ -43,12 +45,43 @@ const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
           <app-barcode-scanner (detected)="onBarcode($event)" />
           @if (scanStatus() === 'searching') {
             <p class="text-center text-sm text-muted">{{ 'scan.searching' | t }}</p>
-          } @else if (scanStatus() === 'notFound') {
-            <p class="text-center text-sm text-muted">{{ 'scan.notFound' | t }}</p>
           }
           <button class="btn-secondary" type="button" (click)="scanning.set(false)">
             {{ 'app.cancel' | t }}
           </button>
+        } @else if (pendingBarcode()) {
+          <!-- Code-barres inconnu (spec 7.10) : création manuelle, le
+               code-barres est conservé pour que le prochain scan reconnaisse
+               le produit. -->
+          <section class="card flex flex-col gap-3 border-primary">
+            <p class="text-sm text-muted">{{ 'scan.notFound' | t }}</p>
+            <p class="text-xs text-muted">
+              {{ 'stock.scannedBarcode' | t: { barcode: pendingBarcode()! } }}
+            </p>
+            <label class="flex flex-col gap-1">
+              <span class="text-sm font-medium">{{ 'stock.productName' | t }}</span>
+              <input class="input" type="text" name="barcodeName" [(ngModel)]="genericName" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-sm font-medium">{{ 'stock.productKind' | t }}</span>
+              <select class="input" name="barcodeKind" [(ngModel)]="productKind">
+                @for (kind of kinds; track kind) {
+                  <option [value]="kind">{{ 'stock.kinds.' + kind | t }}</option>
+                }
+              </select>
+            </label>
+            <button
+              class="btn-primary"
+              type="button"
+              [disabled]="!genericName.trim()"
+              (click)="createFromBarcode()"
+            >
+              {{ 'stock.createFromBarcode' | t }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="pendingBarcode.set(null)">
+              {{ 'app.cancel' | t }}
+            </button>
+          </section>
         } @else {
           <button class="btn-primary" type="button" (click)="startScan()">
             {{ 'stock.scan' | t }}
@@ -79,7 +112,15 @@ const UNITS: Unit[] = ['g', 'kg', 'ml', 'cl', 'l', 'unit'];
               </li>
             }
             @if (productSearch().trim().length > 1 && !searching()) {
-              <li>
+              <li class="flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-sm">
+                  <span class="shrink-0 text-muted">{{ 'stock.productKind' | t }}</span>
+                  <select class="input flex-1 !py-1" name="createKind" [(ngModel)]="productKind">
+                    @for (kind of kinds; track kind) {
+                      <option [value]="kind">{{ 'stock.kinds.' + kind | t }}</option>
+                    }
+                  </select>
+                </label>
                 <button
                   type="button"
                   class="btn-secondary w-full"
@@ -177,7 +218,11 @@ export class AddStockPage implements OnInit {
   private readonly router = inject(Router);
 
   protected readonly units = UNITS;
+  protected readonly kinds = KINDS;
   protected readonly locations = signal<StorageLocation[]>([]);
+  protected productKind: ProductKind = 'food';
+  /** Code-barres scanné mais inconnu, conservé pour la création (spec 7.10). */
+  protected readonly pendingBarcode = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
     const householdId = this.householdId;
@@ -231,8 +276,30 @@ export class AddStockPage implements OnInit {
     if (!this.householdId) {
       return;
     }
-    const product = await this.stockApi.createProduct(this.householdId, { name });
+    const product = await this.stockApi.createProduct(this.householdId, {
+      name,
+      kind: this.productKind,
+    });
     this.selectProduct(product);
+  }
+
+  /** Création depuis un code-barres inconnu : la référence garde le code (spec 7.10). */
+  protected async createFromBarcode(): Promise<void> {
+    const householdId = this.householdId;
+    const barcode = this.pendingBarcode();
+    const name = this.genericName.trim();
+    if (!householdId || !barcode || !name) {
+      return;
+    }
+    const created = await this.stockApi.createReference(householdId, {
+      newProduct: { name, kind: this.productKind, defaultUnit: 'g' },
+      barcode,
+      name,
+      source: 'manual',
+    });
+    this.pendingBarcode.set(null);
+    this.selectProduct(created.product);
+    this.selectedReference.set(created.reference);
   }
 
   protected startScan(): void {
@@ -261,10 +328,12 @@ export class AddStockPage implements OnInit {
         this.selectedProduct.set({
           id: '',
           name: lookup.external.name,
+          kind: 'food',
           category: lookup.external.categories[0] ?? null,
           defaultUnit: 'g',
           unitWeightGrams: null,
           densityGPerMl: null,
+          freezeShelfLifeDays: null,
           nutritionPer100: lookup.external.nutritionPer100,
           allergens: lookup.external.allergens,
           isGlobal: true,
@@ -273,6 +342,9 @@ export class AddStockPage implements OnInit {
         this.storageLocationId ||= this.locations()[0]?.id ?? '';
       }
     } catch {
+      /** Inconnu partout : on garde le code pour la création manuelle (spec 7.10). */
+      this.pendingBarcode.set(barcode);
+      this.genericName = '';
       this.scanStatus.set('notFound');
       this.scanning.set(false);
     }

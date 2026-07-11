@@ -93,6 +93,16 @@ type Filter = 'all' | 'expiringSoon';
                         {{ item.storageLocation.name }}
                       </span>
                     }
+                    @if (item.frozenAt) {
+                      <span class="rounded-full bg-surface px-2 py-0.5 text-xs">
+                        ❄️ {{ 'stock.frozen' | t }}
+                      </span>
+                    }
+                    @if (item.product && item.product.kind !== 'food') {
+                      <span class="rounded-full bg-surface px-2 py-0.5 text-xs">
+                        {{ 'stock.kinds.' + item.product.kind | t }}
+                      </span>
+                    }
                     @if (expiryLabel(item); as label) {
                       <span
                         class="rounded-full px-2 py-0.5 text-xs font-medium"
@@ -216,6 +226,17 @@ type Filter = 'all' | 'expiringSoon';
                 <button type="button" class="btn-secondary text-primary" [disabled]="pending()" (click)="consumeAll(item)">
                   ✓ {{ 'stock.consumeAll' | t }}
                 </button>
+                @if (!item.frozenAt && hasFreezer()) {
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    [disabled]="pending()"
+                    [title]="'stock.freezeHint' | t"
+                    (click)="freeze(item)"
+                  >
+                    ❄️ {{ 'stock.freeze' | t }}
+                  </button>
+                }
                 <div class="flex gap-2">
                   @for (reason of discardReasons; track reason) {
                     <button
@@ -260,6 +281,9 @@ export class StockPage implements OnInit {
   protected consumeQuantity = 1;
 
   protected readonly discardReasons = ['trashed', 'lost', 'given'] as const;
+  protected readonly hasFreezer = computed(() =>
+    this.locations().some((location) => location.type === 'freezer'),
+  );
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -328,6 +352,11 @@ export class StockPage implements OnInit {
 
   protected async discard(item: StockItem, reason: 'trashed' | 'lost' | 'given'): Promise<void> {
     await this.runAction(() => this.stockApi.discard(this.householdId()!, item.id, reason));
+  }
+
+  /** Congélation (spec 5.22) : congélateur par défaut du foyer. */
+  protected async freeze(item: StockItem): Promise<void> {
+    await this.runAction(() => this.stockApi.freeze(this.householdId()!, item.id));
   }
 
   /** Badge de péremption : périmé / aujourd'hui / dans N jours (≤ 7 j). */

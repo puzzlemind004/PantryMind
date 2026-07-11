@@ -77,13 +77,17 @@ export interface NutritionPer100 {
 
 export type Unit = 'mg' | 'g' | 'kg' | 'ml' | 'cl' | 'l' | 'unit';
 
+export type ProductKind = 'food' | 'cleaning' | 'hygiene' | 'pet' | 'other';
+
 export interface Product {
   id: string;
   name: string;
+  kind: ProductKind;
   category: string | null;
   defaultUnit: Unit;
   unitWeightGrams: number | null;
   densityGPerMl: number | null;
+  freezeShelfLifeDays: number | null;
   nutritionPer100: NutritionPer100 | null;
   allergens: string[];
   isGlobal: boolean;
@@ -133,6 +137,7 @@ export interface StockItem {
   status: StockItemStatus;
   addedAt: string;
   expiresAt: string | null;
+  frozenAt: string | null;
   version: number;
   isExpired: boolean;
   product?: Product;

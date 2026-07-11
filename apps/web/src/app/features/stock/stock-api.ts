@@ -78,17 +78,26 @@ export class StockApi {
     );
   }
 
-  searchProducts(householdId: string, search: string): Promise<Product[]> {
+  searchProducts(householdId: string, search: string, kind?: string): Promise<Product[]> {
     return firstValueFrom(
-      this.api.get<Product[]>(`/households/${householdId}/products`, { search }),
+      this.api.get<Product[]>(`/households/${householdId}/products`, { search, kind }),
     );
   }
 
   createProduct(
     householdId: string,
-    payload: { name: string; defaultUnit?: Unit },
+    payload: { name: string; kind?: string; defaultUnit?: Unit },
   ): Promise<Product> {
     return firstValueFrom(this.api.post<Product>(`/households/${householdId}/products`, payload));
+  }
+
+  freeze(householdId: string, itemId: string, storageLocationId?: string): Promise<StockItem> {
+    return firstValueFrom(
+      this.api.post<StockItem>(
+        `/households/${householdId}/stock-items/${itemId}/freeze`,
+        storageLocationId ? { storageLocationId } : {},
+      ),
+    );
   }
 
   lookupBarcode(householdId: string, barcode: string): Promise<BarcodeLookup> {
@@ -100,7 +109,7 @@ export class StockApi {
   createReference(
     householdId: string,
     payload: {
-      newProduct?: { name: string; defaultUnit?: Unit };
+      newProduct?: { name: string; kind?: string; defaultUnit?: Unit };
       productId?: string;
       barcode?: string | null;
       name: string;
