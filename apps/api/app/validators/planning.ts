@@ -34,7 +34,9 @@ export const cancelPlannedMealValidator = vine.create({
 })
 
 export const duplicatePlannedMealValidator = vine.create({
-  date: vine.date(),
+  /** Une date unique ou plusieurs jours d'un coup (spec §6.4). */
+  date: vine.date().optional(),
+  dates: vine.array(vine.date()).minLength(1).maxLength(31).optional(),
 })
 
 export const addMealRecipeValidator = vine.create({

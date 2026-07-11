@@ -178,6 +178,7 @@ router
         router
           .group(() => {
             router.post('shopping-list/generate', [controllers.ShoppingLists, 'generate'])
+            router.post('shopping-list/scan', [controllers.ShoppingLists, 'scan'])
             router.post('shopping-list/items', [controllers.ShoppingLists, 'addItem'])
             router.patch('shopping-list/items/:itemId', [controllers.ShoppingLists, 'updateItem'])
             router.delete('shopping-list/items/:itemId', [controllers.ShoppingLists, 'destroyItem'])

@@ -24,6 +24,10 @@ export const updateShoppingItemValidator = vine.create({
   quantity: vine.number().positive(),
 })
 
+export const scanShoppingValidator = vine.create({
+  barcode: vine.string().trim().minLength(4).maxLength(32),
+})
+
 export const checkShoppingItemValidator = vine.create({
   storageLocationId: vine.string().uuid().nullable().optional(),
   expiresAt: vine.date().nullable().optional(),

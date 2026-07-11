@@ -46,6 +46,11 @@ export default class StockItemsController {
         productQuery.whereILike('name', `%${filters.search}%`)
       })
     }
+    if (filters.kind) {
+      query.whereHas('product', (productQuery) => {
+        productQuery.where('kind', filters.kind!)
+      })
+    }
     if (filters.expiringWithinDays !== undefined) {
       query.whereNotNull('expires_at')
       query.where(

@@ -8,6 +8,7 @@ import ProductThreshold from '#models/product_threshold'
 import ShoppingList from '#models/shopping_list'
 import ShoppingListItem from '#models/shopping_list_item'
 import ActivityLogService from '#services/activity_log_service'
+import CatalogService from '#services/catalog_service'
 import StockAvailabilityService from '#services/stock_availability_service'
 import StockService from '#services/stock_service'
 import UnitService from '#services/unit_service'
@@ -197,6 +198,76 @@ export default class ShoppingService {
   }
 
   /**
+   * In-store barcode scan (spec §8.9): checks the matching unchecked
+   * line (stock fed with the scanned reference), or adds-and-checks an
+   * unplanned purchase. Unknown barcodes bubble up as 404 — the manual
+   * creation flow applies (7.10).
+   */
+  static async scanBarcode(household: Household, user: User, barcode: string) {
+    let lookup = await CatalogService.lookupBarcode(barcode)
+
+    /** OFF hit: the article is physically in hand — import it directly. */
+    if (lookup.status === 'external') {
+      const external = lookup.external
+      const packageUnit =
+        external.packageUnit && UnitService.isKnown(external.packageUnit)
+          ? external.packageUnit
+          : null
+      const reference = await CatalogService.createReference(household, {
+        newProduct: { name: external.name, defaultUnit: packageUnit ?? 'unit' },
+        barcode: external.barcode,
+        name: external.name,
+        brand: external.brand,
+        packageQuantity: packageUnit ? external.packageQuantity : null,
+        packageUnit,
+        nutritionPer100: external.nutritionPer100,
+        imageUrl: external.imageUrl,
+        source: 'off',
+      })
+      lookup = { status: 'local', reference }
+    }
+
+    if (lookup.status !== 'local') {
+      throw new Exception('Code-barres inconnu — créez le produit manuellement', {
+        status: 404,
+        code: 'BARCODE_UNKNOWN',
+      })
+    }
+
+    const reference = lookup.reference
+    const list = await this.activeList(household)
+
+    let item = await ShoppingListItem.query()
+      .where('shopping_list_id', list.id)
+      .where('product_id', reference.productId)
+      .whereNull('checked_at')
+      .first()
+
+    let status: 'checked' | 'added' = 'checked'
+    if (item) {
+      /** La référence scannée fait foi pour l'entrée en stock (1 paquet). */
+      item.productReferenceId = reference.id
+      item.packageCount = reference.packageQuantity && reference.packageUnit ? 1 : null
+      await item.save()
+    } else {
+      status = 'added'
+      item = await ShoppingListItem.create({
+        shoppingListId: list.id,
+        productId: reference.productId,
+        productName: reference.product.name,
+        neededQuantity: reference.packageQuantity ?? 1,
+        unit: reference.packageUnit ?? reference.product.defaultUnit,
+        productReferenceId: reference.id,
+        packageCount: reference.packageQuantity && reference.packageUnit ? 1 : null,
+        source: 'manual',
+      })
+    }
+
+    await this.checkItem(item, household, user)
+    return { status, item, productName: reference.product.name }
+  }
+
+  /**
    * Unchecking reverts the stock entry only when the created lot is
    * still untouched (spec §8.14: actions are undoable) — otherwise the
    * stock is left as-is and only the checkbox state changes.
@@ -344,10 +415,7 @@ export default class ShoppingService {
     for (const threshold of thresholds) {
       const available =
         availability.get(StockAvailabilityService.key(threshold.productId, threshold.unit)) ?? 0
-      const projected = Math.max(
-        available - beforeInUnit(threshold.productId, threshold.unit),
-        0
-      )
+      const projected = Math.max(available - beforeInUnit(threshold.productId, threshold.unit), 0)
       const plannedNeed = required.find((entry) => entry.productId === threshold.productId)
       const plannedInThresholdUnit = plannedNeed
         ? (UnitService.convert(plannedNeed.quantity, plannedNeed.unit, threshold.unit, {

@@ -64,10 +64,7 @@ test.group('Shopping | window (spec 5.24)', (group) => {
     assert.equal(items[0].neededQuantity, 300)
   })
 
-  test('meals before the shopping date are excluded from the list', async ({
-    client,
-    assert,
-  }) => {
+  test('meals before the shopping date are excluded from the list', async ({ client, assert }) => {
     const { user, household, lunch, recipe } = await setup()
 
     /** Repas demain, courses à J+2 : ce repas sera déjà passé. */

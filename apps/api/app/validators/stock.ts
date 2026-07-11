@@ -1,12 +1,15 @@
 import vine from '@vinejs/vine'
 
 import { UNIT_CODES } from '#services/unit_service'
+import { PRODUCT_KINDS } from '#types/catalog'
 import { DISCARD_REASONS, STOCK_ITEM_STATUSES } from '#types/stock'
 
 export const listStockValidator = vine.create({
   status: vine.enum(STOCK_ITEM_STATUSES).optional(),
   storageLocationId: vine.string().uuid().optional(),
   productId: vine.string().uuid().optional(),
+  /** Filtre par type de produit (spec §6.1). */
+  kind: vine.enum(PRODUCT_KINDS).optional(),
   search: vine.string().trim().maxLength(100).optional(),
   /** Only lots expiring within N days (includes already expired ones). */
   expiringWithinDays: vine.number().min(0).max(365).optional(),

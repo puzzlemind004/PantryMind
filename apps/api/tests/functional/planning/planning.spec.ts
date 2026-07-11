@@ -129,9 +129,10 @@ test.group('Planning | meals', (group) => {
       .loginAs(user)
 
     duplicated.assertStatus(201)
-    assert.equal(duplicated.body().data.date, '2026-07-13')
-    assert.equal(duplicated.body().data.status, 'planned')
-    assert.equal(duplicated.body().data.recipes[0].snapshot.name, 'Pâtes au beurre')
+    const copy = duplicated.body().data.meals[0]
+    assert.equal(copy.date, '2026-07-13')
+    assert.equal(copy.status, 'planned')
+    assert.equal(copy.recipes[0].snapshot.name, 'Pâtes au beurre')
   })
 
   test('cancelling a meal keeps it visible without stock impact (spec 7.2)', async ({

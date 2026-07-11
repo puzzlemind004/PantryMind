@@ -9,6 +9,7 @@ import {
   addShoppingItemValidator,
   checkShoppingItemValidator,
   generateShoppingListValidator,
+  scanShoppingValidator,
   updateShoppingItemValidator,
 } from '#validators/shopping'
 
@@ -26,9 +27,7 @@ export default class ShoppingListsController {
 
     const list = await ShoppingService.generate(household, auth.getUserOrFail(), {
       shoppingDate: payload.shoppingDate ? toDateTime(payload.shoppingDate) : undefined,
-      nextShoppingDate: payload.nextShoppingDate
-        ? toDateTime(payload.nextShoppingDate)
-        : undefined,
+      nextShoppingDate: payload.nextShoppingDate ? toDateTime(payload.nextShoppingDate) : undefined,
     })
 
     return serialize(ShoppingListTransformer.transform(list))
@@ -98,6 +97,21 @@ export default class ShoppingListsController {
     const list = await ShoppingService.activeList(household)
     await ShoppingService.loadItems(list)
     return serialize(ShoppingListTransformer.transform(list))
+  }
+
+  /** Scan en magasin (spec §8.9) : coche la ligne ou ajoute+coche. */
+  async scan({ household, auth, request, serialize }: HttpContext) {
+    const { barcode } = await request.validateUsing(scanShoppingValidator)
+
+    const result = await ShoppingService.scanBarcode(household, auth.getUserOrFail(), barcode)
+
+    const list = await ShoppingService.activeList(household)
+    await ShoppingService.loadItems(list)
+    return serialize({
+      status: result.status,
+      productName: result.productName,
+      list: ShoppingListTransformer.transform(list),
+    })
   }
 
   async uncheckItem({ household, params, response, serialize }: HttpContext) {

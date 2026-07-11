@@ -151,40 +151,52 @@ export default class PlanningService {
     await meal.save()
   }
 
-  /** Duplicates a meal (recipes included) to a target date (spec §6.4). */
-  static async duplicate(meal: PlannedMeal, targetDate: DateTime) {
+  /**
+   * Duplicates a meal (recipes included) to one or several target dates
+   * (spec §6.4 : ex. reporter le petit-déjeuner sur toute la semaine).
+   * Each copy is an independent meal with its own snapshots.
+   */
+  static async duplicate(meal: PlannedMeal, targetDates: DateTime[]) {
     await meal.load('recipes')
 
     return db.transaction(async (trx) => {
-      const copy = await PlannedMeal.create(
-        {
-          householdId: meal.householdId,
-          date: targetDate,
-          mealTypeId: meal.mealTypeId,
-          mealName: meal.mealName,
-          timeOverride: meal.timeOverride,
-          status: 'planned',
-          notes: meal.notes,
-          version: 1,
-        },
-        { client: trx }
-      )
+      const copies: PlannedMeal[] = []
 
-      for (const mealRecipe of meal.recipes) {
-        await PlannedMealRecipe.create(
+      for (const targetDate of targetDates) {
+        const copy = await PlannedMeal.create(
           {
-            plannedMealId: copy.id,
-            recipeId: mealRecipe.recipeId,
-            servings: mealRecipe.servings,
-            snapshot: mealRecipe.snapshot,
+            householdId: meal.householdId,
+            date: targetDate,
+            mealTypeId: meal.mealTypeId,
+            mealName: meal.mealName,
+            timeOverride: meal.timeOverride,
+            status: 'planned',
+            notes: meal.notes,
+            version: 1,
           },
           { client: trx }
         )
+
+        for (const mealRecipe of meal.recipes) {
+          await PlannedMealRecipe.create(
+            {
+              plannedMealId: copy.id,
+              recipeId: mealRecipe.recipeId,
+              servings: mealRecipe.servings,
+              snapshot: mealRecipe.snapshot,
+            },
+            { client: trx }
+          )
+        }
+
+        copies.push(copy)
       }
 
-      await copy.load('mealType')
-      await copy.load('recipes')
-      return copy
+      for (const copy of copies) {
+        await copy.load('mealType')
+        await copy.load('recipes')
+      }
+      return copies
     })
   }
 

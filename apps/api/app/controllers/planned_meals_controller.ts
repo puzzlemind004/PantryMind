@@ -99,18 +99,26 @@ export default class PlannedMealsController {
     return serialize(PlannedMealTransformer.transform(meal))
   }
 
+  /** Duplication vers une date unique ou plusieurs jours (spec §6.4). */
   async duplicate({ household, params, request, response, serialize }: HttpContext) {
-    const { date } = await request.validateUsing(duplicatePlannedMealValidator)
+    const { date, dates } = await request.validateUsing(duplicatePlannedMealValidator)
+
+    const targetDates = [...(dates ?? []), ...(date ? [date] : [])].map(toDateTime)
+    if (targetDates.length === 0) {
+      return response.unprocessableEntity({
+        errors: [{ code: 'DATE_REQUIRED', message: 'Provide date or dates' }],
+      })
+    }
 
     const meal = await this.findMeal(household.id, params.mealId)
     if (!meal) {
       return this.notFound(response)
     }
 
-    const copy = await PlanningService.duplicate(meal, toDateTime(date))
+    const copies = await PlanningService.duplicate(meal, targetDates)
 
     response.status(201)
-    return serialize(PlannedMealTransformer.transform(copy))
+    return serialize({ meals: PlannedMealTransformer.transform(copies) })
   }
 
   /** Attaches a recipe (snapshot frozen at this instant, spec 7.3). */
