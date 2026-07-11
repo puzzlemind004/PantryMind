@@ -2,7 +2,7 @@
 
 ## Plateforme intelligente de gestion alimentaire
 
-**Version :** 0.2 (Document de travail)
+**Version :** 0.3 (Document de travail)
 
 ## Historique des versions
 
@@ -10,6 +10,7 @@
 | --- | --- | --- |
 | 0.1 | — | Rédaction initiale de la spécification fonctionnelle. |
 | 0.2 | 2026-07-03 | Intégration des décisions validées avec l'équipe de développement : phasage en lots, stratégie hors ligne, sources de données produits (Open Food Facts, CIQUAL), horaires de repas, suppression du statut « réservé », propriété des recettes par foyer, versioning des recettes par snapshot, facteurs de conversion par produit, authentification. |
+| 0.3 | 2026-07-11 | Retours d'usage réel du porteur : types de produits (le stock et les courses accueillent le non-alimentaire, les recettes restent strictement alimentaires — règle 5.21), congélation d'un lot avec ajustement de la DLC (règle 5.22), création manuelle d'un produit à partir d'un code-barres inconnu (7.10 précisé). Redécoupage du phasage : ces évolutions forment le Lot 5, l'ancien Lot 5 (offline avancé, temps réel) devient le « Lot bonus ». |
 
 ---
 
@@ -225,7 +226,8 @@ Afin de permettre une mise en service progressive et une utilisation réelle au 
 * **Lot 2** : recettes, planning des repas, validation des repas (consommation du stock).
 * **Lot 3** : génération et gestion de la liste de courses, validation des achats.
 * **Lot 4** : suivi nutritionnel, moteur de recommandation, notifications push, mode automatique.
-* **Lot 5** : mode hors ligne avancé, collaboration multi-utilisateur en temps réel.
+* **Lot 5** : élargissement au non-alimentaire (types de produits, règle 5.21), congélation des lots (règle 5.22), création manuelle d'un produit depuis un code-barres inconnu (7.10).
+* **Lot bonus** (non prioritaire, décalé tant que des besoins concrets subsistent) : mode hors ligne avancé, collaboration multi-utilisateur en temps réel.
 
 Le flux prioritaire à couvrir de bout en bout est le suivant :
 
@@ -328,9 +330,11 @@ Exemples :
 ### Propriétés principales
 
 * nom
+* type de produit : alimentaire, entretien, hygiène, animaux, autre (voir règle 5.21)
 * catégorie alimentaire
 * unité principale (grammes, litres, unité, etc.)
 * facteurs de conversion optionnels (masse d'une unité, densité) permettant les conversions entre unités (ex. : 1 œuf ≈ 50 g)
+* durée de conservation recommandée au congélateur (optionnel, voir règle 5.22)
 * informations nutritionnelles de base (optionnel)
 * allergènes
 * contraintes de conservation générales
@@ -904,6 +908,43 @@ L’utilisateur peut activer un mode automatique qui :
 * réduit les notifications
 
 Ce mode reste désactivable à tout moment.
+
+---
+
+## 5.21 Types de produits
+
+Le foyer achète et stocke des produits qui ne sont pas tous alimentaires (produits d'entretien, d'hygiène, pour animaux…).
+
+### Règle
+
+Chaque produit porte un type : **alimentaire**, **entretien**, **hygiène**, **animaux** ou **autre**.
+
+* Le **stock** et la **liste de courses** acceptent tous les types (y compris les seuils de réapprovisionnement).
+* Les **recettes**, le **suivi nutritionnel** et le **moteur de recommandation** ne concernent que les produits **alimentaires** : un produit non alimentaire ne peut pas être ajouté comme ingrédient.
+* Les produits importés d'Open Food Facts sont alimentaires par défaut.
+* Le type par défaut d'un produit créé manuellement est « alimentaire », modifiable à la création comme après coup.
+
+---
+
+## 5.22 Congélation d'un lot
+
+L'utilisateur peut congeler un aliment pour prolonger sa conservation.
+
+### Règle
+
+La congélation est une **action explicite** sur un lot du stock :
+
+1. le lot est déplacé vers un emplacement de type congélateur ;
+2. sa date limite de consommation est recalculée : **date de congélation + durée de conservation au congélateur** du produit (durée propre au produit si renseignée, sinon durée par défaut de 90 jours) ;
+3. le lot est marqué comme congelé et l'opération est tracée dans l'historique (ancienne DLC, nouvelle DLC, emplacement d'origine).
+
+Remarques :
+
+* la congélation n'est proposée que si le foyer possède au moins un emplacement de type congélateur ;
+* un lot déjà congelé ne peut pas être recongelé ;
+* la décongélation se gère par une correction manuelle du lot (emplacement et DLC), conformément à la règle 5.18.
+
+---
 
 # 6. Description fonctionnelle des modules
 
@@ -1492,7 +1533,7 @@ Un code-barres n’existe pas dans la base de données.
 
 Le système propose :
 
-* création d’un produit manuel
+* création d’un produit manuel — **le code-barres scanné est conservé** et attaché à la référence commerciale créée, afin que le prochain scan du même produit soit reconnu immédiatement
 * recherche alternative
 * import de données externes (si disponible)
 
